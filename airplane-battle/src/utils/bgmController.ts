@@ -80,8 +80,19 @@ export class BGMController implements IBGMController {
           })
           .catch(error => {
             console.warn(`Failed to play background music: ${musicId}`, error)
+            
+            // 检查是否是自动播放策略错误
+            if (error.name === 'NotAllowedError') {
+              console.warn('浏览器阻止了自动播放，需要用户交互后才能播放音频')
+            }
+            
             this.handlePlaybackError(error)
           })
+      } else {
+        // 如果没有返回Promise，直接设置状态
+        this.currentMusic = musicId
+        this.currentAudio = audio
+        console.log(`Background music started (sync): ${musicId}`)
       }
 
     } catch (error) {

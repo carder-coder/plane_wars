@@ -1,4 +1,4 @@
-import { AudioConfig, SoundId, SoundType } from '../types/sound'
+import { AudioConfig, SoundId, SoundType, SoundQuality } from '../types/sound'
 
 /**
  * 音频资源配置
@@ -139,7 +139,7 @@ export const DEFAULT_SOUND_SETTINGS = {
   masterVolume: 0.7,
   musicVolume: 0.5,
   sfxVolume: 0.8,
-  soundQuality: 'medium' as const
+  soundQuality: SoundQuality.MEDIUM
 }
 
 /**

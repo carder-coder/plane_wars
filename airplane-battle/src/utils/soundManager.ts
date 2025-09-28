@@ -127,7 +127,16 @@ export class SoundManager implements ISoundManager {
    * 播放背景音乐
    */
   playMusic(musicId: SoundId, options: PlayOptions = {}): void {
-    if (!this.settings.musicEnabled || !this.isInitialized) {
+    console.log(`请求播放背景音乐: ${musicId}`);
+    console.log(`音乐开关: ${this.settings.musicEnabled}, 初始化状态: ${this.isInitialized}`);
+    
+    if (!this.settings.musicEnabled) {
+      console.warn('背景音乐已被禁用');
+      return
+    }
+    
+    if (!this.isInitialized) {
+      console.warn('音效系统尚未初始化');
       return
     }
 
