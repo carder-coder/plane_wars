@@ -357,7 +357,7 @@ export interface MusicDownloadState {
   searchResults: SearchResult | null
   currentSearch: SearchRequest | null
   downloadQueue: DownloadTask[]
-  downloadedResources: AudioResource[]
+  downloadedResources: DownloadedResource[]  // 修改为 DownloadedResource[]
   settings: MusicDownloadSettings
   apiStatus: Record<MusicProvider, boolean>
   isSearching: boolean
@@ -382,6 +382,16 @@ export interface MusicDownloadActions {
   pauseDownload(taskId: string): void
   cancelDownload(taskId: string): void
   retryDownload(taskId: string): Promise<void>
+  
+  // 队列管理
+  clearCompleted(): void
+  clearAll(): void
+  getOverallProgress(): {
+    total: number
+    completed: number
+    failed: number
+    inProgress: number
+  }
   
   // 资源管理
   deleteDownloadedResource(audioId: string): Promise<void>
@@ -409,6 +419,20 @@ export type MusicDownloadEvent =
   | 'download_error'
   | 'queue_update'
   | 'settings_change'
+
+/**
+ * 已下载资源类型 (简化版AudioResource)
+ */
+export interface DownloadedResource {
+  id: string
+  name: string
+  category: GameAudioCategory
+  fileSize: number
+  duration?: number
+  filePath: string
+  downloadedAt: Date
+  format: string
+}
 
 /**
  * 事件监听器类型

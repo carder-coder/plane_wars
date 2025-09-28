@@ -98,16 +98,16 @@ export const AudioResourceCard: React.FC<AudioResourceCardProps> = ({
 
   return (
     <Card
-      className=\"audio-resource-card\"
-      size=\"small\"
+      className="audio-resource-card"
+      size="small"
       hoverable
       actions={[
         <Tooltip title={isPlaying ? '暂停预览' : '播放预览'}>
           <Button
-            type=\"text\"
+            type="text"
             icon={
               isPreviewLoading ? (
-                <div className=\"loading-spinner-small\" />
+                <div className="loading-spinner-small" />
               ) : isPlaying ? (
                 <PauseCircleOutlined />
               ) : (
@@ -119,31 +119,31 @@ export const AudioResourceCard: React.FC<AudioResourceCardProps> = ({
           />
         </Tooltip>,
         showDownloadButton && (
-          <Tooltip title=\"下载音频\">
+          <Tooltip title="下载音频">
             <Button
-              type=\"text\"
+              type="text"
               icon={<DownloadOutlined />}
               onClick={onDownload}
               disabled={audioResource.downloaded}
             />
           </Tooltip>
         ),
-        <Tooltip title=\"查看详情\">
+        <Tooltip title="查看详情">
           <Button
-            type=\"text\"
+            type="text"
             icon={<InfoCircleOutlined />}
             onClick={() => window.open(audioResource.url, '_blank')}
           />
         </Tooltip>
       ]}
     >
-      <div className=\"audio-card-content\">
+      <div className="audio-card-content">
         {/* 标题和标签 */}
-        <div className=\"audio-header\">
-          <Typography.Title level={5} className=\"audio-title\">
+        <div className="audio-header">
+          <Typography.Title level={5} className="audio-title">
             {audioResource.name}
           </Typography.Title>
-          <div className=\"audio-tags\">
+          <div className="audio-tags">
             <Tag color={getCategoryColor(audioResource.gameCategory)}>
               {getCategoryLabel(audioResource.gameCategory)}
             </Tag>
@@ -152,14 +152,14 @@ export const AudioResourceCard: React.FC<AudioResourceCardProps> = ({
                 {audioResource.bitRate}kbps
               </Tag>
             )}
-            <Tag color=\"blue\">{audioResource.format.toUpperCase()}</Tag>
+            <Tag color="blue">{audioResource.format.toUpperCase()}</Tag>
           </div>
         </div>
 
         {/* 描述 */}
         {audioResource.description && (
           <Paragraph 
-            className=\"audio-description\"
+            className="audio-description"
             ellipsis={{ rows: 2, expandable: false }}
           >
             {audioResource.description}
@@ -167,16 +167,16 @@ export const AudioResourceCard: React.FC<AudioResourceCardProps> = ({
         )}
 
         {/* 基本信息 */}
-        <div className=\"audio-info\">
-          <Space wrap size=\"small\">
-            <Text type=\"secondary\">
+        <div className="audio-info">
+          <Space wrap size="small">
+            <Text type="secondary">
               <ClockCircleOutlined /> {formatDuration(audioResource.duration)}
             </Text>
-            <Text type=\"secondary\">
+            <Text type="secondary">
               <FileOutlined /> {formatFileSize(audioResource.fileSize)}
             </Text>
             {audioResource.author && (
-              <Text type=\"secondary\">
+              <Text type="secondary">
                 <UserOutlined /> {audioResource.author}
               </Text>
             )}
@@ -184,17 +184,17 @@ export const AudioResourceCard: React.FC<AudioResourceCardProps> = ({
         </div>
 
         {/* 音频参数 */}
-        <div className=\"audio-params\">
-          <Space wrap size=\"small\">
-            <Text type=\"secondary\" className=\"param-item\">
+        <div className="audio-params">
+          <Space wrap size="small">
+            <Text type="secondary" className="param-item">
               {audioResource.sampleRate / 1000}kHz
             </Text>
-            <Text type=\"secondary\" className=\"param-item\">
+            <Text type="secondary" className="param-item">
               {audioResource.channels === 1 ? '单声道' : '立体声'}
             </Text>
             {audioResource.license && (
               <Tooltip title={audioResource.licenseUrl}>
-                <Text type=\"secondary\" className=\"license-item\">
+                <Text type="secondary" className="license-item">
                   <LinkOutlined /> {audioResource.license}
                 </Text>
               </Tooltip>
@@ -204,14 +204,14 @@ export const AudioResourceCard: React.FC<AudioResourceCardProps> = ({
 
         {/* 标签云 */}
         {audioResource.tags && audioResource.tags.length > 0 && (
-          <div className=\"audio-tags-cloud\">
+          <div className="audio-tags-cloud">
             {audioResource.tags.slice(0, 5).map((tag, index) => (
-              <Tag key={index} size=\"small\">
+              <Tag key={index}>
                 {tag}
               </Tag>
             ))}
             {audioResource.tags.length > 5 && (
-              <Text type=\"secondary\" className=\"more-tags\">
+              <Text type="secondary" className="more-tags">
                 +{audioResource.tags.length - 5} 更多
               </Text>
             )}
@@ -219,11 +219,11 @@ export const AudioResourceCard: React.FC<AudioResourceCardProps> = ({
         )}
 
         {/* 来源信息 */}
-        <div className=\"audio-source\">
-          <Text type=\"secondary\" className=\"source-info\">
+        <div className="audio-source">
+          <Text type="secondary" className="source-info">
             来源: {audioResource.source}
             {audioResource.downloaded && (
-              <Tag color=\"success\" size=\"small\" style={{ marginLeft: 8 }}>
+              <Tag color="success" style={{ marginLeft: 8 }}>
                 已下载
               </Tag>
             )}

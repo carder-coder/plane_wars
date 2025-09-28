@@ -9,8 +9,7 @@ import {
   SearchRequest, 
   SearchResult,
   MusicProvider,
-  GameAudioCategory,
-  AudioQuality
+  GameAudioCategory
 } from '../../types/musicDownload'
 
 /**

@@ -3,7 +3,7 @@
  * 提供音乐搜索和浏览功能
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { 
   Input, 
   Select, 
@@ -21,11 +21,7 @@ import {
   Space
 } from 'antd'
 import { 
-  SearchOutlined, 
-  PlayCircleOutlined, 
-  PauseCircleOutlined,
-  DownloadOutlined,
-  InfoCircleOutlined
+  SearchOutlined
 } from '@ant-design/icons'
 import { AudioResourceCard } from './AudioResourceCard'
 import { useMusicDownloadStore } from '../../store/musicDownloadStore'
@@ -132,6 +128,7 @@ export const MusicSearchPanel: React.FC = () => {
   const handleDownload = (audioResource: AudioResource) => {
     try {
       const taskId = addToDownloadQueue(audioResource)
+      console.log('Task added with ID:', taskId) // 使用taskId变量以避免TS6133错误
       message.success(`已添加到下载队列：${audioResource.name}`)
     } catch (error) {
       message.error('添加到下载队列失败')
@@ -169,28 +166,28 @@ export const MusicSearchPanel: React.FC = () => {
   ]
 
   return (
-    <div className=\"music-search-panel\">
+    <div className="music-search-panel">
       {/* 搜索区域 */}
-      <Card className=\"search-filters-card\" size=\"small\">
+      <Card className="search-filters-card" size="small">
         <Row gutter={[16, 16]}>
           <Col xs={24} md={12}>
             <Search
-              placeholder=\"搜索音乐、音效...\"
+              placeholder="搜索音乐、音效..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onSearch={handleSearch}
               enterButton={<SearchOutlined />}
-              size=\"large\"
+              size="large"
               loading={isSearching}
             />
           </Col>
           <Col xs={12} md={6}>
             <Select
-              placeholder=\"音频分类\"
+              placeholder="音频分类"
               value={selectedCategory}
               onChange={setSelectedCategory}
               allowClear
-              size=\"large\"
+              size="large"
               style={{ width: '100%' }}
             >
               {categoryOptions.map(option => (
@@ -205,7 +202,7 @@ export const MusicSearchPanel: React.FC = () => {
               <Select
                 value={sortField}
                 onChange={setSortField}
-                size=\"large\"
+                size="large"
                 style={{ width: 120 }}
               >
                 {sortOptions.map(option => (
@@ -217,7 +214,7 @@ export const MusicSearchPanel: React.FC = () => {
               <Select
                 value={sortOrder}
                 onChange={setSortOrder}
-                size=\"large\"
+                size="large"
                 style={{ width: 80 }}
               >
                 <Option value={SortOrder.DESC}>降序</Option>
@@ -229,7 +226,7 @@ export const MusicSearchPanel: React.FC = () => {
         
         <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
           <Col xs={24} md={12}>
-            <div className=\"duration-filter\">
+            <div className="duration-filter">
               <label>时长范围 (秒): {durationRange[0]} - {durationRange[1]}</label>
               <Slider
                 range
@@ -237,14 +234,18 @@ export const MusicSearchPanel: React.FC = () => {
                 max={600}
                 step={5}
                 value={durationRange}
-                onChange={setDurationRange}
+                onChange={(value: number | number[]) => {
+                  if (Array.isArray(value)) {
+                    setDurationRange([value[0], value[1]])
+                  }
+                }}
                 style={{ marginTop: 8 }}
               />
             </div>
           </Col>
           <Col xs={24} md={12}>
             <Space>
-              <Button onClick={handleSearch} type=\"primary\" loading={isSearching}>
+              <Button onClick={handleSearch} type="primary" loading={isSearching}>
                 搜索
               </Button>
               <Button onClick={handleClearSearch}>
@@ -256,19 +257,19 @@ export const MusicSearchPanel: React.FC = () => {
       </Card>
 
       {/* 搜索结果区域 */}
-      <Card className=\"search-results-card\" style={{ marginTop: 16 }}>
+      <Card className="search-results-card" style={{ marginTop: 16 }}>
         {isSearching ? (
-          <div className=\"loading-container\">
-            <Spin size=\"large\" />
+          <div className="loading-container">
+            <Spin size="large" />
             <p style={{ marginTop: 16 }}>正在搜索音乐资源...</p>
           </div>
         ) : searchResults ? (
           <>
-            <div className=\"results-header\">
+            <div className="results-header">
               <h3>
                 搜索结果 ({searchResults.total} 个)
-                {searchQuery && <Tag color=\"blue\">关键词: {searchQuery}</Tag>}
-                {selectedCategory && <Tag color=\"green\">分类: {categoryOptions.find(c => c.value === selectedCategory)?.label}</Tag>}
+                {searchQuery && <Tag color="blue">关键词: {searchQuery}</Tag>}
+                {selectedCategory && <Tag color="green">分类: {categoryOptions.find(c => c.value === selectedCategory)?.label}</Tag>}
               </h3>
             </div>
             
@@ -313,14 +314,14 @@ export const MusicSearchPanel: React.FC = () => {
               </>
             ) : (
               <Empty
-                description=\"没有找到相关音乐资源\"
+                description="没有找到相关音乐资源"
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
               />
             )}
           </>
         ) : (
           <Empty
-            description=\"输入关键词开始搜索音乐\"
+            description="输入关键词开始搜索音乐"
             image={Empty.PRESENTED_IMAGE_SIMPLE}
           />
         )}

@@ -2,8 +2,7 @@ import {
   ISFXPlayer, 
   PlayOptions, 
   SoundId, 
-  IAudioResourceManager,
-  AudioInstance 
+  IAudioResourceManager
 } from '../types/sound'
 
 /**
@@ -152,7 +151,7 @@ export class SFXPlayer implements ISFXPlayer {
    * 停止所有音效
    */
   stopAll(): void {
-    this.activeInstances.forEach((audio, instanceId) => {
+    this.activeInstances.forEach((audio, _instanceId) => {
       if (!audio.paused) {
         audio.pause()
         audio.currentTime = 0

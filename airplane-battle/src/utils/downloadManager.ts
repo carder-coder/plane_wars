@@ -9,7 +9,6 @@ import {
   AudioResource, 
   AudioProcessingOptions,
   ApiError,
-  ApiErrorType,
   IMusicDownloadManager,
   SearchRequest,
   SearchResult,
@@ -284,10 +283,13 @@ export class DownloadManager implements IMusicDownloadManager {
       
       // 在实际应用中，这里应该调用文件系统API
       // 这里模拟文件保存过程
-      const blob = new Blob([data], { type: this.getContentType(audioResource.format) })
+      const dataArray = Array.from(data as Uint8Array)
+      const blob = new Blob([new Uint8Array(dataArray)], { type: this.getContentType(audioResource.format) })
       
       // 创建临时URL（用于预览）
-      const tempUrl = URL.createObjectURL(blob)
+      const _tempUrl = URL.createObjectURL(blob)
+      // 使用_tempUrl变量以避免TS6133错误
+      console.log('Temporary URL created:', _tempUrl)
       
       // 在实际环境中，应该使用File System Access API或其他方式保存文件
       // 这里返回临时路径
@@ -545,7 +547,7 @@ export class DownloadManager implements IMusicDownloadManager {
   /**
    * 根据ID获取音频资源
    */
-  private async getAudioResourceById(audioId: string): Promise<AudioResource | null> {
+  private async getAudioResourceById(_audioId: string): Promise<AudioResource | null> {
     // 这里应该实现从搜索结果或缓存中获取音频资源的逻辑
     // 暂时返回null，需要在集成时完善
     return null

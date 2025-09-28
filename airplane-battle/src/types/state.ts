@@ -3,7 +3,8 @@ import {
   AirplanePosition, 
   AttackRecord, 
   GamePhase, 
-  GameMode 
+  GameMode,
+  AttackResult
 } from './game'
 import { SoundSettings, SoundId } from './sound'
 
@@ -12,7 +13,7 @@ import { SoundSettings, SoundId } from './sound'
  * 包含单个玩家的所有游戏状态信息
  */
 export interface PlayerState {
-  id: number                      // 玩家ID (1 或 2)
+  id: 1 | 2                      // 玩家ID (1 或 2)
   name: string                    // 玩家名称
   grid: CellType[][]              // 10x10 网格状态
   airplane: AirplanePosition      // 飞机位置信息
@@ -60,6 +61,12 @@ export interface GameActionResult {
   success: boolean                // 操作是否成功
   message: string                 // 结果消息
   data?: any                      // 附加数据
+}
+
+// 攻击结果扩展类型
+export interface AttackActionResult extends GameActionResult {
+  attackResult: AttackResult      // 攻击结果类型
+  gameEnded: boolean              // 游戏是否结束
 }
 
 /**

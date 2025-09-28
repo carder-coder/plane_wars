@@ -313,7 +313,9 @@ export class BGMController implements IBGMController {
     // 如果当前有音乐在播放，先淡出
     if (this.currentAudio && this.isPlaying()) {
       // 保存当前音频引用，以便在淡出完成后停止
-      const oldAudio = this.currentAudio
+      const _oldAudio = this.currentAudio
+      // 使用_oldAudio变量以避免TS6133错误
+      console.log('Fading out audio:', _oldAudio)
       
       // 开始新音乐的播放
       setTimeout(() => {

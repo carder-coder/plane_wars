@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react'
-import { Card, Tabs, Button, message } from 'antd'
+import { Card, Tabs, message } from 'antd'
 import { DownloadOutlined, SearchOutlined, SettingOutlined, PlayCircleOutlined } from '@ant-design/icons'
 import { MusicSearchPanel } from './MusicSearchPanel'
 import { DownloadQueuePanel } from './DownloadQueuePanel'
@@ -12,8 +12,6 @@ import { DownloadedResourcesPanel } from './DownloadedResourcesPanel'
 import { MusicDownloadSettings } from './MusicDownloadSettings'
 import { useMusicDownloadStore } from '../../store/musicDownloadStore'
 import './MusicDownloadPanel.css'
-
-const { TabPane } = Tabs
 
 /**
  * 音乐下载管理面板组件
@@ -52,7 +50,7 @@ export const MusicDownloadPanel: React.FC = () => {
 
   // 获取整体进度信息
   const overallProgress = getOverallProgress()
-  const hasActiveDownloads = downloadQueue.some(task => 
+  const hasActiveDownloads = downloadQueue.some((task: any) => 
     task.status === 'downloading' || task.status === 'pending'
   )
 
@@ -112,9 +110,9 @@ export const MusicDownloadPanel: React.FC = () => {
 
   if (!isInitialized) {
     return (
-      <Card className=\"music-download-panel loading-panel\">
-        <div className=\"loading-content\">
-          <div className=\"loading-spinner\" />
+      <Card className="music-download-panel loading-panel">
+        <div className="loading-content">
+          <div className="loading-spinner" />
           <p>正在初始化音乐下载系统...</p>
         </div>
       </Card>
@@ -122,14 +120,14 @@ export const MusicDownloadPanel: React.FC = () => {
   }
 
   return (
-    <div className=\"music-download-panel\">
+    <div className="music-download-panel">
       <Card 
-        title=\"音乐下载管理\" 
-        className=\"music-download-card\"
+        title="音乐下载管理" 
+        className="music-download-card"
         extra={
-          <div className=\"panel-header-extra\">
+          <div className="panel-header-extra">
             {hasActiveDownloads && (
-              <div className=\"progress-indicator\">
+              <div className="progress-indicator">
                 正在下载: {overallProgress.inProgress} / {overallProgress.total}
               </div>
             )}
@@ -139,7 +137,7 @@ export const MusicDownloadPanel: React.FC = () => {
         <Tabs
           activeKey={activeTab}
           onChange={setActiveTab}
-          className=\"music-download-tabs\"
+          className="music-download-tabs"
           items={tabItems}
         />
       </Card>

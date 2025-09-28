@@ -88,7 +88,7 @@ export class AudioResourceManager implements IAudioResourceManager {
         resolve(instance)
       }
 
-      const onError = (error: Event) => {
+      const onError = (_error: Event) => {
         const retryCount = this.errorCount.get(config.id) || 0
         
         if (retryCount < this.maxRetries) {

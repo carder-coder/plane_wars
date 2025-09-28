@@ -12,7 +12,7 @@ import {
   ApiErrorType,
   MusicProviderConfig,
   GameAudioCategory 
-} from '../types/musicDownload'
+} from '../../types/musicDownload'
 
 /**
  * 抽象音乐库API客户端
@@ -75,6 +75,18 @@ export abstract class BaseMusicApiClient {
   }
 
   /**
+   * 检查是否为 ApiError 类型
+   */
+  private isApiError(error: any): error is ApiError {
+    return error && 
+           typeof error === 'object' &&
+           'type' in error &&
+           'message' in error &&
+           'retryable' in error &&
+           Object.values(ApiErrorType).includes(error.type)
+  }
+
+  /**
    * 发起HTTP请求
    */
   protected async makeRequest(
@@ -110,7 +122,7 @@ export abstract class BaseMusicApiClient {
 
       return response
     } catch (error) {
-      if (error instanceof ApiError) {
+      if (this.isApiError(error)) {
         throw error
       }
       

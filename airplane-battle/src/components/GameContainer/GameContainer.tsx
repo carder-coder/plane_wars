@@ -27,15 +27,15 @@ export const GameContainer: React.FC = () => {
     startNewGame,
     resetGame,
     placeAirplane,
-    removeAirplane,
+
+    
     confirmPlacement,
     attack,
     updateSoundSettings,
     
     // 辅助方法
     getCurrentPlayerState,
-    getOpponentPlayerState,
-    canPlaceAirplane
+    getOpponentPlayerState
   } = useGameStore()
 
   // AI玩家实例
@@ -96,15 +96,15 @@ export const GameContainer: React.FC = () => {
       return
     }
 
-    const currentPlayerData = getCurrentPlayerState()
-    const result = confirmPlacement(currentPlayerData.id)
+    // 直接使用玄家1，因为这是人类玩家的确认操作
+    const result = confirmPlacement(1)
     
     if (result.success) {
       message.success(result.message)
     } else {
       message.error(result.message)
     }
-  }, [currentPhase, confirmPlacement, getCurrentPlayerState])
+  }, [currentPhase, confirmPlacement])
 
   // 处理攻击
   const handleAttack = useCallback((x: number, y: number) => {
@@ -236,7 +236,10 @@ export const GameContainer: React.FC = () => {
               winner,
               turnCount,
               gameStartTime: Date.now(),
-              gameEndTime: winner ? Date.now() : undefined
+              gameEndTime: winner ? Date.now() : undefined,
+              soundSettings,
+              isMusicPlaying: false,
+              currentMusic: null
             }}
           />
         </div>

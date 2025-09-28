@@ -3,7 +3,6 @@ import { Button, Select, Space, Divider, Switch, Slider, Row, Col } from 'antd'
 import { 
   PlayCircleOutlined, 
   ReloadOutlined, 
-  PauseCircleOutlined,
   SettingOutlined,
   RobotOutlined,
   UserOutlined,

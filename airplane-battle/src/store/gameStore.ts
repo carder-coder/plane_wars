@@ -8,6 +8,7 @@ import {
   Coordinate,
   Orientation,
   GameActionResult,
+  AttackActionResult,
   SoundSettings,
   SoundId
 } from '../types'
@@ -17,7 +18,7 @@ import {
   validateAirplanePlacement,
   getAllAirplaneCoordinates
 } from '../utils/airplaneUtils'
-import { processAttack, checkGameEnd } from '../utils/gameLogic'
+import { processAttack } from '../utils/gameLogic'
 import { DEFAULT_SOUND_SETTINGS } from '../utils/soundConfig'
 import { soundManager } from '../utils/soundManager'
 
@@ -72,7 +73,7 @@ interface GameStore extends GameState {
   confirmPlacement: (playerId: 1 | 2) => GameActionResult
   
   // 攻击相关
-  attack: (coordinate: Coordinate) => GameActionResult
+  attack: (coordinate: Coordinate) => AttackActionResult
   
   // 游戏流程控制
   switchToNextPlayer: () => void
@@ -234,11 +235,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (state.currentPhase !== GamePhase.BATTLE) {
       return {
         success: false,
-        message: '当前不在战斗阶段'
+        message: '当前不在战斗阶段',
+        attackResult: 'miss' as const,
+        gameEnded: false
       }
     }
 
-    const currentPlayer = state.players[`player${state.currentPlayer}` as keyof typeof state.players]
     const targetPlayer = state.players[`player${state.currentPlayer === 1 ? 2 : 1}` as keyof typeof state.players]
 
     // 播放攻击发射音效
@@ -252,11 +254,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     // 根据攻击结果播放相应音效
-    if (attackResult.result === 'hit_head') {
+    if (attackResult.attackResult === 'hit_head') {
       soundManager.playSound(SoundId.HIT_HEAD)
-    } else if (attackResult.result === 'hit_body') {
+    } else if (attackResult.attackResult === 'hit_body') {
       soundManager.playSound(SoundId.HIT_BODY)
-    } else if (attackResult.result === 'miss') {
+    } else if (attackResult.attackResult === 'miss') {
       soundManager.playSound(SoundId.ATTACK_MISS)
     }
 

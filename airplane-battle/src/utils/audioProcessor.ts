@@ -222,7 +222,7 @@ export class AudioProcessor implements IAudioProcessor {
   private async encodeAudioBuffer(
     audioBuffer: AudioBuffer, 
     format: string, 
-    options: { bitRate?: number } = {}
+    _options: { bitRate?: number } = {}
   ): Promise<Blob> {
     // 这里是一个简化的实现，实际应用中需要使用Web Audio API的音频编码器
     // 或者服务器端处理

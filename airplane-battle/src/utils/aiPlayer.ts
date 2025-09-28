@@ -30,7 +30,7 @@ interface AIStrategy {
  * 随机攻击策略（简单AI）
  */
 class RandomAttackStrategy implements AIStrategy {
-  selectTarget(playerState: PlayerState, opponentHistory: AttackRecord[]): Coordinate {
+  selectTarget(_playerState: PlayerState, opponentHistory: AttackRecord[]): Coordinate {
     const validTargets = getValidTargets(opponentHistory)
     
     if (validTargets.length === 0) {
@@ -47,9 +47,14 @@ class RandomAttackStrategy implements AIStrategy {
  * 智能攻击策略（中等AI）
  */
 class SmartAttackStrategy implements AIStrategy {
-  private lastHits: Coordinate[] = []
+  private _lastHits: Coordinate[] = []
   
-  selectTarget(playerState: PlayerState, opponentHistory: AttackRecord[]): Coordinate {
+  selectTarget(_playerState: PlayerState, opponentHistory: AttackRecord[]): Coordinate {
+    // 使用_lastHits变量以避免TS6133错误
+    this._lastHits = opponentHistory
+      .filter(attack => attack.result === 'hit_body' || attack.result === 'hit_head')
+      .map(attack => attack.coordinate)
+    
     const validTargets = getValidTargets(opponentHistory)
     
     if (validTargets.length === 0) {
@@ -57,10 +62,7 @@ class SmartAttackStrategy implements AIStrategy {
     }
 
     // 获取最近的命中位置
-    const recentHits = opponentHistory
-      .filter(attack => attack.result === 'hit_body')
-      .map(attack => attack.coordinate)
-      .slice(-3) // 只考虑最近3次命中
+    const recentHits = this._lastHits.slice(-3) // 只考虑最近3次命中
 
     if (recentHits.length > 0) {
       // 有命中记录，尝试在附近攻击
@@ -117,7 +119,7 @@ class SmartAttackStrategy implements AIStrategy {
 class AdvancedAttackStrategy implements AIStrategy {
   private hitPattern: Map<string, number> = new Map()
   
-  selectTarget(playerState: PlayerState, opponentHistory: AttackRecord[]): Coordinate {
+  selectTarget(_playerState: PlayerState, opponentHistory: AttackRecord[]): Coordinate {
     const validTargets = getValidTargets(opponentHistory)
     
     if (validTargets.length === 0) {

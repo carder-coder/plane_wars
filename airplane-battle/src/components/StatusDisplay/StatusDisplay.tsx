@@ -22,7 +22,6 @@ export const StatusDisplay: React.FC<StatusDisplayProps> = ({ gameState }) => {
   const {
     currentPhase,
     currentPlayer,
-    gameMode,
     players,
     winner,
     turnCount,

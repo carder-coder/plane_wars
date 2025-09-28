@@ -146,7 +146,7 @@ export class PixabayMusicApiClient extends BaseMusicApiClient {
   /**
    * 映射排序字段
    */
-  private mapSortField(field: string, order: string): string {
+  private mapSortField(field: string, _order: string): string {
     switch (field) {
       case 'relevance':
         return 'popular' // Pixabay的相关性排序

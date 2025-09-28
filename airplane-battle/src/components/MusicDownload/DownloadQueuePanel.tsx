@@ -22,8 +22,7 @@ import {
   PauseCircleOutlined, 
   DeleteOutlined,
   RedoOutlined,
-  ClearOutlined,
-  DownloadOutlined
+  ClearOutlined
 } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import { useMusicDownloadStore } from '../../store/musicDownloadStore'
@@ -49,7 +48,7 @@ export const DownloadQueuePanel: React.FC = () => {
   } = useMusicDownloadStore()
 
   // 过滤下载任务
-  const filteredTasks = downloadQueue.filter(task => 
+  const filteredTasks = downloadQueue.filter((task: DownloadTask) => 
     statusFilter === 'all' || task.status === statusFilter
   )
 
@@ -162,7 +161,7 @@ export const DownloadQueuePanel: React.FC = () => {
         <div>
           <Progress 
             percent={Math.round(record.progress)} 
-            size=\"small\"
+            size="small"
             status={record.status === DownloadStatus.FAILED ? 'exception' : 'active'}
           />
           <div style={{ fontSize: '12px', color: '#666', marginTop: 2 }}>
@@ -209,12 +208,12 @@ export const DownloadQueuePanel: React.FC = () => {
       key: 'actions',
       width: 150,
       render: (_, record) => (
-        <Space size=\"small\">
+        <Space size="small">
           {record.status === DownloadStatus.PENDING && (
-            <Tooltip title=\"开始下载\">
+            <Tooltip title="开始下载">
               <Button
-                type=\"text\"
-                size=\"small\"
+                type="text"
+                size="small"
                 icon={<PlayCircleOutlined />}
                 onClick={() => handleStart(record.taskId)}
               />
@@ -222,10 +221,10 @@ export const DownloadQueuePanel: React.FC = () => {
           )}
           
           {record.status === DownloadStatus.DOWNLOADING && (
-            <Tooltip title=\"暂停下载\">
+            <Tooltip title="暂停下载">
               <Button
-                type=\"text\"
-                size=\"small\"
+                type="text"
+                size="small"
                 icon={<PauseCircleOutlined />}
                 onClick={() => handlePause(record.taskId)}
               />
@@ -233,10 +232,10 @@ export const DownloadQueuePanel: React.FC = () => {
           )}
           
           {record.status === DownloadStatus.FAILED && record.retryCount < 3 && (
-            <Tooltip title=\"重试下载\">
+            <Tooltip title="重试下载">
               <Button
-                type=\"text\"
-                size=\"small\"
+                type="text"
+                size="small"
                 icon={<RedoOutlined />}
                 onClick={() => handleRetry(record.taskId)}
               />
@@ -244,16 +243,16 @@ export const DownloadQueuePanel: React.FC = () => {
           )}
           
           {record.status !== DownloadStatus.COMPLETED && (
-            <Tooltip title=\"取消下载\">
+            <Tooltip title="取消下载">
               <Popconfirm
-                title=\"确定要取消这个下载任务吗？\"
+                title="确定要取消这个下载任务吗？"
                 onConfirm={() => handleCancel(record.taskId)}
-                okText=\"确定\"
-                cancelText=\"取消\"
+                okText="确定"
+                cancelText="取消"
               >
                 <Button
-                  type=\"text\"
-                  size=\"small\"
+                  type="text"
+                  size="small"
                   icon={<DeleteOutlined />}
                   danger
                 />
@@ -280,40 +279,40 @@ export const DownloadQueuePanel: React.FC = () => {
   const overallProgress = getOverallProgress()
 
   return (
-    <div className=\"download-queue-panel\">
+    <div className="download-queue-panel">
       {/* 统计信息 */}
-      <Card size=\"small\" className=\"queue-stats-card\">
-        <div className=\"queue-stats\">
-          <div className=\"stat-item\">
-            <span className=\"stat-label\">总任务：</span>
-            <span className=\"stat-value\">{overallProgress.total}</span>
+      <Card size="small" className="queue-stats-card">
+        <div className="queue-stats">
+          <div className="stat-item">
+            <span className="stat-label">总任务：</span>
+            <span className="stat-value">{overallProgress.total}</span>
           </div>
-          <div className=\"stat-item\">
-            <span className=\"stat-label\">进行中：</span>
-            <span className=\"stat-value processing\">{overallProgress.inProgress}</span>
+          <div className="stat-item">
+            <span className="stat-label">进行中：</span>
+            <span className="stat-value processing">{overallProgress.inProgress}</span>
           </div>
-          <div className=\"stat-item\">
-            <span className=\"stat-label\">已完成：</span>
-            <span className=\"stat-value completed\">{overallProgress.completed}</span>
+          <div className="stat-item">
+            <span className="stat-label">已完成：</span>
+            <span className="stat-value completed">{overallProgress.completed}</span>
           </div>
-          <div className=\"stat-item\">
-            <span className=\"stat-label\">失败：</span>
-            <span className=\"stat-value failed\">{overallProgress.failed}</span>
+          <div className="stat-item">
+            <span className="stat-label">失败：</span>
+            <span className="stat-value failed">{overallProgress.failed}</span>
           </div>
         </div>
       </Card>
 
       {/* 操作栏 */}
-      <Card size=\"small\" className=\"queue-actions-card\" style={{ marginTop: 16 }}>
-        <div className=\"queue-actions\">
+      <Card size="small" className="queue-actions-card" style={{ marginTop: 16 }}>
+        <div className="queue-actions">
           <Space>
             <Select
               value={statusFilter}
               onChange={setStatusFilter}
               style={{ width: 120 }}
-              size=\"small\"
+              size="small"
             >
-              <Option value=\"all\">全部状态</Option>
+              <Option value="all">全部状态</Option>
               <Option value={DownloadStatus.PENDING}>等待中</Option>
               <Option value={DownloadStatus.DOWNLOADING}>下载中</Option>
               <Option value={DownloadStatus.COMPLETED}>已完成</Option>
@@ -322,7 +321,7 @@ export const DownloadQueuePanel: React.FC = () => {
             </Select>
             
             <Button
-              size=\"small\"
+              size="small"
               icon={<ClearOutlined />}
               onClick={handleClearCompleted}
               disabled={overallProgress.completed === 0}
@@ -331,13 +330,13 @@ export const DownloadQueuePanel: React.FC = () => {
             </Button>
             
             <Popconfirm
-              title=\"确定要清空所有下载任务吗？\"
+              title="确定要清空所有下载任务吗？"
               onConfirm={handleClearAll}
-              okText=\"确定\"
-              cancelText=\"取消\"
+              okText="确定"
+              cancelText="取消"
             >
               <Button
-                size=\"small\"
+                size="small"
                 icon={<DeleteOutlined />}
                 danger
                 disabled={overallProgress.total === 0}
@@ -350,13 +349,13 @@ export const DownloadQueuePanel: React.FC = () => {
       </Card>
 
       {/* 下载队列表格 */}
-      <Card size=\"small\" style={{ marginTop: 16 }}>
+      <Card size="small" style={{ marginTop: 16 }}>
         {filteredTasks.length > 0 ? (
           <Table
             columns={columns}
             dataSource={filteredTasks}
-            rowKey=\"taskId\"
-            size=\"small\"
+            rowKey="taskId"
+            size="small"
             pagination={{
               pageSize: 10,
               showSizeChanger: true,
