@@ -4,7 +4,7 @@ import {
   TrophyOutlined, 
   FireOutlined, 
   ClockCircleOutlined,
-  TargetOutlined,
+  AimOutlined,
   RobotOutlined,
   UserOutlined
 } from '@ant-design/icons'
@@ -140,12 +140,12 @@ export const StatusDisplay: React.FC<StatusDisplayProps> = ({ gameState }) => {
     }
 
     return (
-      <Timeline size="small" className="status-display__timeline">
+      <Timeline className="status-display__timeline">
         {allAttacks.map((attack, index) => (
           <Timeline.Item
             key={index}
             color={attack.result === 'hit_head' ? 'red' : attack.result === 'hit_body' ? 'orange' : 'gray'}
-            dot={attack.result === 'hit_head' ? <TrophyOutlined /> : attack.result === 'hit_body' ? <FireOutlined /> : <TargetOutlined />}
+            dot={attack.result === 'hit_head' ? <TrophyOutlined /> : attack.result === 'hit_body' ? <FireOutlined /> : <AimOutlined />}
           >
             <div className="status-display__attack-item">
               <div className="status-display__attack-header">

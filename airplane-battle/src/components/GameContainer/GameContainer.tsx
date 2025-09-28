@@ -4,8 +4,9 @@ import { GameGrid } from '../GameGrid/GameGrid'
 import { ControlPanel } from '../ControlPanel/ControlPanel'
 import { StatusDisplay } from '../StatusDisplay/StatusDisplay'
 import { useGameStore } from '../../store/gameStore'
-import { GameMode, GamePhase, Orientation } from '../../types'
+import { GameMode, GamePhase, Orientation, SoundId } from '../../types'
 import { AIPlayer, AIDifficulty } from '../../utils/aiPlayer'
+import { soundManager } from '../../utils/soundManager'
 import './GameContainer.css'
 
 /**
@@ -20,6 +21,7 @@ export const GameContainer: React.FC = () => {
     players,
     winner,
     turnCount,
+    soundSettings,
     
     // 游戏控制方法
     startNewGame,
@@ -28,6 +30,7 @@ export const GameContainer: React.FC = () => {
     removeAirplane,
     confirmPlacement,
     attack,
+    updateSoundSettings,
     
     // 辅助方法
     getCurrentPlayerState,
@@ -78,8 +81,11 @@ export const GameContainer: React.FC = () => {
       const result = placeAirplane(playerId, x, y, orientation)
       if (result.success) {
         message.success(result.message)
+        // 播放放置音效在gameStore中已处理
       } else {
         message.error(result.message)
+        // 播放错误音效
+        soundManager.playSound(SoundId.BUTTON_CLICK, { volume: 0.3 })
       }
     }, [currentPhase, placeAirplane])
 
@@ -217,6 +223,8 @@ export const GameContainer: React.FC = () => {
             canConfirmPlacement={canPlayer1ConfirmPlacement}
             isGameInProgress={currentPhase !== GamePhase.PLACEMENT || players.player1.isReady}
             turnCount={turnCount}
+            soundSettings={soundSettings}
+            onSoundSettingsChange={updateSoundSettings}
           />
           
           <StatusDisplay 

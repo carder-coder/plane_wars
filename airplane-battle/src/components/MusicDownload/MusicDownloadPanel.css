@@ -1,0 +1,292 @@
+/**
+ * 音乐下载面板样式
+ */
+
+.music-download-panel {
+  width: 100%;
+  height: 100%;
+}
+
+.music-download-card {
+  height: 100%;
+}
+
+.music-download-card .ant-card-body {
+  padding: 16px;
+  height: calc(100% - 57px);
+}
+
+.music-download-tabs {
+  height: 100%;
+}
+
+.music-download-tabs .ant-tabs-content-holder {
+  height: calc(100% - 46px);
+  overflow: auto;
+}
+
+.panel-header-extra {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.progress-indicator {
+  font-size: 12px;
+  color: #1890ff;
+  background: #f0f8ff;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.download-badge,
+.resource-badge {
+  background: #ff4d4f;
+  color: white;
+  border-radius: 50%;
+  padding: 0 6px;
+  font-size: 10px;
+  margin-left: 4px;
+}
+
+/* 加载状态 */
+.loading-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.loading-content {
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #1890ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+.loading-spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #1890ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 搜索面板样式 */
+.music-search-panel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-filters-card {
+  flex-shrink: 0;
+}
+
+.search-results-card {
+  flex: 1;
+  overflow: auto;
+}
+
+.duration-filter label {
+  font-size: 12px;
+  color: #666;
+}
+
+.results-header {
+  margin-bottom: 16px;
+}
+
+.results-header h3 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.loading-container {
+  text-align: center;
+  padding: 40px 0;
+}
+
+/* 音频资源卡片样式 */
+.audio-resource-card {
+  height: 100%;
+}
+
+.audio-card-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.audio-header {
+  margin-bottom: 8px;
+}
+
+.audio-title {
+  margin: 0 0 8px 0 !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+}
+
+.audio-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.audio-description {
+  margin: 8px 0 !important;
+  font-size: 12px;
+  color: #666;
+}
+
+.audio-info,
+.audio-params {
+  margin: 4px 0;
+  font-size: 11px;
+}
+
+.param-item,
+.license-item {
+  font-size: 11px !important;
+}
+
+.audio-tags-cloud {
+  margin: 8px 0;
+}
+
+.audio-tags-cloud .ant-tag {
+  margin: 2px;
+  font-size: 10px;
+}
+
+.more-tags {
+  font-size: 10px;
+  margin-left: 4px;
+}
+
+.audio-source {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.source-info {
+  font-size: 10px !important;
+}
+
+/* 下载队列面板样式 */
+.download-queue-panel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.queue-stats-card,
+.queue-actions-card {
+  flex-shrink: 0;
+}
+
+.queue-stats {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #666;
+}
+
+.stat-value {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.stat-value.processing {
+  color: #1890ff;
+}
+
+.stat-value.completed {
+  color: #52c41a;
+}
+
+.stat-value.failed {
+  color: #ff4d4f;
+}
+
+.queue-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .music-download-panel {
+    padding: 8px;
+  }
+  
+  .audio-resource-card .ant-card-actions {
+    padding: 8px 12px;
+  }
+  
+  .queue-stats {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .queue-actions {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+}
+
+/* 动画效果 */
+.audio-resource-card {
+  transition: all 0.3s ease;
+}
+
+.audio-resource-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.ant-progress-bg {
+  transition: width 0.3s ease;
+}
+
+/* 暗色主题适配 */
+@media (prefers-color-scheme: dark) {
+  .loading-spinner {
+    border: 3px solid #434343;
+    border-top: 3px solid #1890ff;
+  }
+  
+  .loading-spinner-small {
+    border: 2px solid #434343;
+    border-top: 2px solid #1890ff;
+  }
+}

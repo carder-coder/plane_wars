@@ -1,14 +1,17 @@
 import React from 'react'
-import { Button, Select, Space, Divider } from 'antd'
+import { Button, Select, Space, Divider, Switch, Slider, Row, Col } from 'antd'
 import { 
   PlayCircleOutlined, 
   ReloadOutlined, 
   PauseCircleOutlined,
   SettingOutlined,
   RobotOutlined,
-  UserOutlined
+  UserOutlined,
+  SoundOutlined,
+  CustomerServiceOutlined
 } from '@ant-design/icons'
-import { GameMode, GamePhase } from '../../types'
+import { GameMode, GamePhase, SoundSettings, SoundId } from '../../types'
+import { soundManager } from '../../utils/soundManager'
 import './ControlPanel.css'
 
 const { Option } = Select
@@ -23,6 +26,8 @@ interface ControlPanelProps {
   canConfirmPlacement: boolean
   isGameInProgress: boolean
   turnCount: number
+  soundSettings: SoundSettings
+  onSoundSettingsChange: (settings: Partial<SoundSettings>) => void
 }
 
 /**
@@ -37,16 +42,57 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onConfirmPlacement,
   canConfirmPlacement,
   isGameInProgress,
-  turnCount
+  turnCount,
+  soundSettings,
+  onSoundSettingsChange
 }) => {
   const [selectedMode, setSelectedMode] = React.useState<GameMode>(GameMode.PVP)
 
+  const handleStartGame = () => {
+    soundManager.playSound(SoundId.BUTTON_CLICK)
+    onStartGame(selectedMode)
+  }
+
+  const handleResetGame = () => {
+    soundManager.playSound(SoundId.BUTTON_CLICK)
+    onResetGame()
+  }
+
+  const handleConfirmPlacement = () => {
+    soundManager.playSound(SoundId.BUTTON_CLICK)
+    onConfirmPlacement()
+  }
+
   const handleGameModeChange = (mode: GameMode) => {
+    soundManager.playSound(SoundId.BUTTON_CLICK)
     setSelectedMode(mode)
   }
 
-  const handleStartGame = () => {
-    onStartGame(selectedMode)
+  // 音效设置处理
+  const handleSoundEnabledChange = (enabled: boolean) => {
+    onSoundSettingsChange({ soundEnabled: enabled })
+    if (enabled) {
+      soundManager.playSound(SoundId.BUTTON_CLICK)
+    }
+  }
+
+  const handleMusicEnabledChange = (enabled: boolean) => {
+    onSoundSettingsChange({ musicEnabled: enabled })
+    soundManager.playSound(SoundId.BUTTON_CLICK)
+  }
+
+  const handleMasterVolumeChange = (volume: number) => {
+    onSoundSettingsChange({ masterVolume: volume / 100 })
+  }
+
+  const handleMusicVolumeChange = (volume: number) => {
+    onSoundSettingsChange({ musicVolume: volume / 100 })
+  }
+
+  const handleSfxVolumeChange = (volume: number) => {
+    onSoundSettingsChange({ sfxVolume: volume / 100 })
+    // 播放测试音效
+    soundManager.playSound(SoundId.BUTTON_CLICK, { volume: volume / 100 })
   }
 
   const getGameModeIcon = (mode: GameMode) => {
@@ -119,7 +165,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             
             <Button
               icon={<ReloadOutlined />}
-              onClick={onResetGame}
+              onClick={handleResetGame}
               block
             >
               重置游戏
@@ -128,7 +174,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             {gamePhase === GamePhase.PLACEMENT && (
               <Button
                 type="primary"
-                onClick={onConfirmPlacement}
+                onClick={handleConfirmPlacement}
                 disabled={!canConfirmPlacement}
                 block
               >
@@ -136,6 +182,85 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               </Button>
             )}
           </Space>
+        </div>
+      </div>
+
+      <Divider />
+
+      <div className="control-panel__section">
+        <h3 className="control-panel__section-title">
+          <SoundOutlined /> 音效设置
+        </h3>
+        
+        <div className="control-panel__sound-settings">
+          <Row gutter={[16, 16]}>
+            <Col span={12}>
+              <div className="control-panel__field">
+                <label className="control-panel__label">启用音效:</label>
+                <Switch
+                  checked={soundSettings.soundEnabled}
+                  onChange={handleSoundEnabledChange}
+                  checkedChildren={<SoundOutlined />}
+                  unCheckedChildren="OFF"
+                />
+              </div>
+            </Col>
+            
+            <Col span={12}>
+              <div className="control-panel__field">
+                <label className="control-panel__label">背景音乐:</label>
+                <Switch
+                  checked={soundSettings.musicEnabled}
+                  onChange={handleMusicEnabledChange}
+                  disabled={!soundSettings.soundEnabled}
+                  checkedChildren={<CustomerServiceOutlined />}
+                  unCheckedChildren="OFF"
+                />
+              </div>
+            </Col>
+          </Row>
+          
+          <div className="control-panel__field">
+            <label className="control-panel__label">
+              主音量: {Math.round(soundSettings.masterVolume * 100)}%
+            </label>
+            <Slider
+              value={soundSettings.masterVolume * 100}
+              onChange={handleMasterVolumeChange}
+              disabled={!soundSettings.soundEnabled}
+              min={0}
+              max={100}
+              step={5}
+            />
+          </div>
+          
+          <div className="control-panel__field">
+            <label className="control-panel__label">
+              音效音量: {Math.round(soundSettings.sfxVolume * 100)}%
+            </label>
+            <Slider
+              value={soundSettings.sfxVolume * 100}
+              onChange={handleSfxVolumeChange}
+              disabled={!soundSettings.soundEnabled}
+              min={0}
+              max={100}
+              step={5}
+            />
+          </div>
+          
+          <div className="control-panel__field">
+            <label className="control-panel__label">
+              音乐音量: {Math.round(soundSettings.musicVolume * 100)}%
+            </label>
+            <Slider
+              value={soundSettings.musicVolume * 100}
+              onChange={handleMusicVolumeChange}
+              disabled={!soundSettings.soundEnabled || !soundSettings.musicEnabled}
+              min={0}
+              max={100}
+              step={5}
+            />
+          </div>
         </div>
       </div>
 

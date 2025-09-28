@@ -5,6 +5,7 @@ import {
   GamePhase, 
   GameMode 
 } from './game'
+import { SoundSettings, SoundId } from './sound'
 
 /**
  * 玩家状态接口
@@ -36,6 +37,10 @@ export interface GameState {
   turnCount: number               // 回合数
   gameStartTime: number           // 游戏开始时间戳
   gameEndTime?: number            // 游戏结束时间戳
+  // 音效相关状态
+  soundSettings: SoundSettings    // 音效设置
+  isMusicPlaying: boolean         // 背景音乐播放状态
+  currentMusic: SoundId | null    // 当前播放音乐ID
 }
 
 /**
