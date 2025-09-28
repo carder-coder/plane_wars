@@ -1,0 +1,173 @@
+/* 网格单元格样式 */
+.grid-cell {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #d9d9d9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #f5f5f5;
+  user-select: none;
+}
+
+.grid-cell:hover {
+  background-color: #e6f7ff;
+  border-color: #1890ff;
+  transform: scale(1.05);
+}
+
+.grid-cell--disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.grid-cell--disabled:hover {
+  background-color: #f5f5f5;
+  border-color: #d9d9d9;
+  transform: none;
+}
+
+/* 自己的网格样式 */
+.grid-cell--own {
+  background-color: #f6ffed;
+  border-color: #b7eb8f;
+}
+
+.grid-cell--own:hover {
+  background-color: #d9f7be;
+  border-color: #52c41a;
+}
+
+/* 敌方网格样式 */
+.grid-cell--enemy {
+  background-color: #fff2e8;
+  border-color: #ffbb96;
+}
+
+.grid-cell--enemy:hover {
+  background-color: #ffd8bf;
+  border-color: #ff7a45;
+}
+
+/* 预览状态 */
+.grid-cell--preview {
+  background-color: #fff7e6;
+  border-color: #ffd591;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* 不同格子类型的样式 */
+.grid-cell--head {
+  background-color: #ff4d4f;
+  border-color: #ff1114;
+  color: white;
+  font-weight: bold;
+}
+
+.grid-cell--wings {
+  background-color: #1890ff;
+  border-color: #096dd9;
+  color: white;
+}
+
+.grid-cell--body {
+  background-color: #52c41a;
+  border-color: #389e0d;
+  color: white;
+}
+
+.grid-cell--tail {
+  background-color: #722ed1;
+  border-color: #531dab;
+  color: white;
+}
+
+.grid-cell--hit {
+  background-color: #ff4d4f;
+  border-color: #ff1114;
+  animation: explosion 0.5s ease-out;
+}
+
+.grid-cell--miss {
+  background-color: #d9d9d9;
+  border-color: #8c8c8c;
+}
+
+@keyframes explosion {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+    background-color: #ff7875;
+  }
+  100% {
+    transform: scale(1);
+    background-color: #ff4d4f;
+  }
+}
+
+/* 格子内容 */
+.grid-cell__content {
+  font-size: 16px;
+  line-height: 1;
+  z-index: 2;
+}
+
+/* 坐标显示 */
+.grid-cell__coordinates {
+  position: absolute;
+  bottom: 1px;
+  right: 2px;
+  font-size: 8px;
+  color: #8c8c8c;
+  line-height: 1;
+  z-index: 1;
+  opacity: 0.6;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .grid-cell {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .grid-cell__content {
+    font-size: 14px;
+  }
+  
+  .grid-cell__coordinates {
+    font-size: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid-cell {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .grid-cell__content {
+    font-size: 12px;
+  }
+  
+  .grid-cell__coordinates {
+    display: none;
+  }
+}

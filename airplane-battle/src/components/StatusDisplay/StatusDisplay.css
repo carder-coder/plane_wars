@@ -1,0 +1,294 @@
+/* 状态显示组件样式 */
+.status-display {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin: 8px;
+  min-width: 320px;
+  max-width: 400px;
+}
+
+.status-display__header {
+  margin-bottom: 20px;
+}
+
+.status-display__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #262626;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-display__content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.status-display__section {
+  padding: 0;
+}
+
+.status-display__section-title {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #595959;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* 基本信息网格 */
+.status-display__info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.status-display__info-item {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  background-color: #fafafa;
+  border-radius: 6px;
+  border-left: 3px solid #1890ff;
+}
+
+.status-display__info-label {
+  font-size: 12px;
+  color: #8c8c8c;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.status-display__info-value {
+  font-size: 16px;
+  color: #262626;
+  font-weight: 600;
+}
+
+/* 准备状态 */
+.status-display__ready-status {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.status-display__ready-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #f6ffed;
+  border-radius: 4px;
+  border: 1px solid #b7eb8f;
+}
+
+.status-display__ready-item span:first-child {
+  font-size: 13px;
+  color: #389e0d;
+  font-weight: 500;
+}
+
+/* 攻击统计 */
+.status-display__attack-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.status-display__player-stats {
+  padding: 12px;
+  background-color: #f0f8ff;
+  border-radius: 6px;
+  border: 1px solid #d6e4ff;
+}
+
+.status-display__player-stats h4 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  color: #1890ff;
+  font-weight: 600;
+}
+
+.status-display__stats-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #595959;
+}
+
+/* 攻击历史 */
+.status-display__timeline {
+  margin-top: 8px;
+}
+
+.status-display__no-attacks {
+  padding: 20px;
+  text-align: center;
+  color: #8c8c8c;
+  font-size: 14px;
+  background-color: #fafafa;
+  border-radius: 4px;
+}
+
+.status-display__attack-item {
+  margin-bottom: 4px;
+}
+
+.status-display__attack-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.status-display__attack-coord {
+  font-size: 12px;
+  color: #8c8c8c;
+  font-family: monospace;
+}
+
+.status-display__attack-result {
+  font-size: 12px;
+  color: #595959;
+}
+
+/* 当前玩家标签动画 */
+.status-display__current-player {
+  animation: pulse-blue 2s infinite;
+}
+
+@keyframes pulse-blue {
+  0% {
+    box-shadow: 0 0 0 0 rgba(24, 144, 255, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(24, 144, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(24, 144, 255, 0);
+  }
+}
+
+/* Alert 组件自定义样式 */
+.status-display .ant-alert {
+  border-radius: 6px;
+}
+
+.status-display .ant-alert-success {
+  background-color: #f6ffed;
+  border-color: #b7eb8f;
+}
+
+.status-display .ant-alert-info {
+  background-color: #e6f7ff;
+  border-color: #91d5ff;
+}
+
+.status-display .ant-alert-warning {
+  background-color: #fff7e6;
+  border-color: #ffd591;
+}
+
+/* Progress 组件自定义样式 */
+.status-display .ant-progress-line {
+  margin-bottom: 0;
+}
+
+.status-display .ant-progress-text {
+  font-size: 11px;
+}
+
+/* Timeline 组件自定义样式 */
+.status-display .ant-timeline {
+  margin-top: 8px;
+}
+
+.status-display .ant-timeline-item-content {
+  margin-left: 4px;
+}
+
+/* Tag 组件自定义样式 */
+.status-display .ant-tag {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .status-display {
+    padding: 16px;
+    margin: 4px;
+    min-width: 280px;
+    max-width: 320px;
+  }
+
+  .status-display__title {
+    font-size: 16px;
+  }
+
+  .status-display__info-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .status-display__info-item {
+    padding: 10px;
+  }
+
+  .status-display__info-value {
+    font-size: 14px;
+  }
+
+  .status-display__attack-stats {
+    gap: 12px;
+  }
+
+  .status-display__player-stats {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .status-display {
+    padding: 12px;
+    margin: 2px;
+    min-width: 260px;
+    max-width: 300px;
+  }
+
+  .status-display__title {
+    font-size: 14px;
+  }
+
+  .status-display__section-title {
+    font-size: 12px;
+  }
+
+  .status-display__info-item {
+    padding: 8px;
+  }
+
+  .status-display__info-label {
+    font-size: 11px;
+  }
+
+  .status-display__info-value {
+    font-size: 13px;
+  }
+
+  .status-display__player-stats h4 {
+    font-size: 12px;
+  }
+
+  .status-display__stats-row {
+    font-size: 11px;
+  }
+}
