@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
-import { Room, User } from '../models/index.js'
+import { Room, User, IRoomMember } from '../models/index.js'
 import { redis } from '../database/redis.js'
 import { logger } from '../utils/logger.js'
 import { 
@@ -12,6 +12,7 @@ import {
   ApiResponse,
   PaginatedResponse 
 } from '../types/index.js'
+import { Orientation } from '../types/game.js'
 
 /**
  * 房间服务类（MongoDB版本）
@@ -96,7 +97,7 @@ export class MongoRoomService {
       }
 
       // 查找房间
-      const room = await Room.findByRoomId(roomId)
+      const room = await Room.findOne({ roomId })
       if (!room) {
         return {
           success: false,
@@ -172,7 +173,7 @@ export class MongoRoomService {
    */
   public static async leaveRoom(roomId: string, userId: string): Promise<ApiResponse> {
     try {
-      const room = await Room.findByRoomId(roomId)
+      const room = await Room.findOne({ roomId })
       if (!room) {
         return {
           success: false,
@@ -220,7 +221,7 @@ export class MongoRoomService {
     isReady: boolean
   ): Promise<ApiResponse> {
     try {
-      const room = await Room.findByRoomId(roomId)
+      const room = await Room.findOne({ roomId })
       if (!room) {
         return {
           success: false,
@@ -289,7 +290,7 @@ export class MongoRoomService {
             status: room.status,
             hostUsername: host?.username || 'Unknown',
             createdAt: room.createdAt,
-            needPassword: room.needPassword
+            needPassword: room.needPassword || false
           } as RoomListItem
         })
       )
@@ -329,17 +330,14 @@ export class MongoRoomService {
       }
 
       // 从数据库获取房间信息
-      const room = await Room.findByRoomId(roomId)
+      const room = await Room.findOne({ roomId })
       if (!room) {
         return null
       }
 
-      // 获取房主信息
-      const host = await User.findOne({ userId: room.hostUserId }, 'username displayName')
-      
       // 获取成员信息
       const memberUsers = await Promise.all(
-        room.members.map(async (member) => {
+        room.members.map(async (member: IRoomMember) => {
           const user = await User.findOne({ userId: member.userId }, 'username displayName')
           return {
             userId: member.userId,
@@ -351,7 +349,7 @@ export class MongoRoomService {
               body: [],
               wings: [],
               tail: [],
-              orientation: 'horizontal' as const,
+              orientation: Orientation.HORIZONTAL,
               isPlaced: false
             },
             attackHistory: [],
@@ -363,7 +361,17 @@ export class MongoRoomService {
       )
 
       const roomDetails: RoomDetails = {
-        ...room.toJSON(),
+        room_id: room.roomId,
+        room_name: room.roomName,
+        room_type: room.roomType === 'public' ? RoomType.PUBLIC : RoomType.PRIVATE,
+        password: room.password,
+        max_players: room.maxPlayers,
+        current_players: room.currentPlayers,
+        status: room.status === 'waiting' ? RoomStatus.WAITING : 
+                room.status === 'playing' ? RoomStatus.PLAYING : RoomStatus.FINISHED,
+        host_user_id: room.hostUserId,
+        created_at: room.createdAt,
+        updated_at: room.updatedAt,
         players: memberUsers
       }
 
@@ -413,7 +421,7 @@ export class MongoRoomService {
    */
   public static async deleteRoom(roomId: string, userId: string): Promise<ApiResponse> {
     try {
-      const room = await Room.findByRoomId(roomId)
+      const room = await Room.findOne({ roomId })
       if (!room) {
         return {
           success: false,
@@ -461,7 +469,7 @@ export class MongoRoomService {
     targetUserId: string
   ): Promise<ApiResponse> {
     try {
-      const room = await Room.findByRoomId(roomId)
+      const room = await Room.findOne({ roomId })
       if (!room) {
         return {
           success: false,

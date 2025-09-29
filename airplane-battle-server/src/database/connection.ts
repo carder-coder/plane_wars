@@ -25,11 +25,11 @@ export class Database {
     })
 
     // 监听连接事件
-    this.pool.on('connect', (client) => {
+    this.pool.on('connect', (_client) => {
       logger.debug('数据库连接已建立')
     })
 
-    this.pool.on('error', (err, client) => {
+    this.pool.on('error', (err, _client) => {
       logger.error('数据库连接错误:', err)
     })
   }
@@ -99,7 +99,7 @@ export class Database {
    */
   public async testConnection(): Promise<boolean> {
     try {
-      const result = await this.query('SELECT NOW()')
+      await this.query('SELECT NOW()')
       logger.info('数据库连接测试成功')
       return true
     } catch (error) {

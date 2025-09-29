@@ -84,7 +84,7 @@ export class UserService {
       logger.error('用户注册失败:', error)
       
       // 处理数据库唯一约束错误
-      if (error.code === '23505') {
+      if (error instanceof Error && 'code' in error && error.code === '23505') {
         return {
           success: false,
           message: '用户名或邮箱已存在',

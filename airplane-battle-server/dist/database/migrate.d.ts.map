@@ -1,0 +1,1 @@
+{"version":3,"file":"migrate.d.ts","sourceRoot":"","sources":["../../src/database/migrate.ts"],"names":[],"mappings":"AAMA,qBAAa,SAAS;mBAIC,gBAAgB;mBAgChB,gBAAgB;mBA+BhB,sBAAsB;mBAwBtB,gBAAgB;mBAoChB,uBAAuB;WA0BxB,aAAa,IAAI,OAAO,CAAC,IAAI,CAAC;WA2B9B,aAAa,IAAI,OAAO,CAAC,IAAI,CAAC;CAsBnD"}

@@ -57,7 +57,7 @@ program
   .command('validate')
   .description('验证迁移后的数据完整性')
   .option('--detailed', '显示详细验证结果')
-  .action(async (options) => {
+  .action(async (_options) => {
     try {
       const validator = new DataValidator()
       const success = await validator.runFullValidation()
@@ -178,7 +178,7 @@ program
       // 这里可以实现MongoDB数据备份逻辑
       // 使用mongodump或者程序化方式导出数据
       
-      logger.info('数据备份功能暂未实现')
+      logger.info(`数据备份功能暂未实现，选项: ${JSON.stringify(options)}`)
     } catch (error) {
       logger.error('备份失败:', error)
       process.exit(1)
@@ -221,6 +221,9 @@ program
 
       // 1. 执行迁移
       const migration = new DataMigration()
+      if (options.force) {
+        logger.info('强制模式：将覆盖现有数据')
+      }
       await migration.runFullMigration()
 
       // 2. 验证数据

@@ -1,4 +1,4 @@
-import { Schema, model, Document, Types } from 'mongoose'
+import { Schema, model, Document, Model } from 'mongoose'
 
 /**
  * 房间成员接口
@@ -25,6 +25,25 @@ export interface IRoom extends Document {
   members: IRoomMember[]
   createdAt: Date
   updatedAt: Date
+
+  // 虚拟属性
+  needPassword?: boolean
+  isFull?: boolean
+  isEmpty?: boolean
+
+  // 实例方法
+  addMember(userId: string): boolean
+  removeMember(userId: string): boolean
+  setMemberReady(userId: string, isReady: boolean): boolean
+  areAllMembersReady(): boolean
+  startGame(): boolean
+}
+
+// 添加静态方法接口
+export interface IRoomModel extends Model<IRoom> {
+  findWaitingRooms(page: number, limit: number): Promise<IRoom[]>
+  findUserRooms(userId: string): Promise<IRoom[]>
+  findByRoomId(roomId: string): Promise<IRoom | null>
 }
 
 /**
@@ -80,10 +99,10 @@ const roomSchema = new Schema<IRoom>({
     type: String,
     maxlength: 50,
     validate: {
-      validator: function(password: string) {
+      validator: function(this: IRoom, password: string): boolean {
         // 如果是私人房间，必须有密码
         if (this.roomType === 'private') {
-          return password && password.length > 0
+          return !!(password && password.length > 0)
         }
         return true
       },
@@ -102,7 +121,7 @@ const roomSchema = new Schema<IRoom>({
     default: 0,
     min: 0,
     validate: {
-      validator: function(current: number) {
+      validator: function(this: IRoom, current: number): boolean {
         return current <= this.maxPlayers
       },
       message: '当前玩家数不能超过最大玩家数'
@@ -134,7 +153,7 @@ const roomSchema = new Schema<IRoom>({
   timestamps: false, // 我们手动管理时间戳
   versionKey: false,
   toJSON: {
-    transform: function(doc, ret) {
+    transform: function(_doc, ret) {
       delete ret._id
       return ret
     }
@@ -147,20 +166,20 @@ roomSchema.index({ roomType: 1, status: 1 }) // 公共房间查询
 roomSchema.index({ 'members.userId': 1 }) // 用户房间查询
 
 // 虚拟字段
-roomSchema.virtual('needPassword').get(function() {
+roomSchema.virtual('needPassword').get(function(this: IRoom) {
   return this.roomType === 'private' && !!this.password
 })
 
-roomSchema.virtual('isFull').get(function() {
+roomSchema.virtual('isFull').get(function(this: IRoom) {
   return this.currentPlayers >= this.maxPlayers
 })
 
-roomSchema.virtual('isEmpty').get(function() {
+roomSchema.virtual('isEmpty').get(function(this: IRoom) {
   return this.currentPlayers === 0
 })
 
 // 实例方法
-roomSchema.methods.addMember = function(userId: string): boolean {
+roomSchema.methods.addMember = function(this: IRoom, userId: string): boolean {
   // 检查房间是否已满
   if (this.currentPlayers >= this.maxPlayers) {
     return false
@@ -189,7 +208,7 @@ roomSchema.methods.addMember = function(userId: string): boolean {
   return true
 }
 
-roomSchema.methods.removeMember = function(userId: string): boolean {
+roomSchema.methods.removeMember = function(this: IRoom, userId: string): boolean {
   const memberIndex = this.members.findIndex((member: IRoomMember) => member.userId === userId)
   if (memberIndex === -1) {
     return false
@@ -216,7 +235,7 @@ roomSchema.methods.removeMember = function(userId: string): boolean {
   return true
 }
 
-roomSchema.methods.setMemberReady = function(userId: string, isReady: boolean): boolean {
+roomSchema.methods.setMemberReady = function(this: IRoom, userId: string, isReady: boolean): boolean {
   const member = this.members.find((member: IRoomMember) => member.userId === userId)
   if (!member) {
     return false
@@ -228,12 +247,12 @@ roomSchema.methods.setMemberReady = function(userId: string, isReady: boolean): 
   return true
 }
 
-roomSchema.methods.areAllMembersReady = function(): boolean {
+roomSchema.methods.areAllMembersReady = function(this: IRoom): boolean {
   return this.members.length === this.maxPlayers && 
          this.members.every((member: IRoomMember) => member.isReady)
 }
 
-roomSchema.methods.startGame = function(): boolean {
+roomSchema.methods.startGame = function(this: IRoom): boolean {
   if (!this.areAllMembersReady()) {
     return false
   }
@@ -268,7 +287,7 @@ roomSchema.statics.findByRoomId = function(roomId: string) {
 }
 
 // 中间件
-roomSchema.pre('save', function(next) {
+roomSchema.pre('save', function(this: IRoom, next) {
   if (this.isNew) {
     this.createdAt = new Date()
   }
@@ -277,7 +296,7 @@ roomSchema.pre('save', function(next) {
 })
 
 // 验证：确保成员数组与当前玩家数一致
-roomSchema.pre('save', function(next) {
+roomSchema.pre('save', function(this: IRoom, next) {
   if (this.members.length !== this.currentPlayers) {
     this.currentPlayers = this.members.length
   }
@@ -285,4 +304,4 @@ roomSchema.pre('save', function(next) {
 })
 
 // 创建模型
-export const Room = model<IRoom>('Room', roomSchema)
+export const Room = model<IRoom, IRoomModel>('Room', roomSchema)

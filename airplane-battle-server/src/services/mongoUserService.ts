@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { v4 as uuidv4 } from 'uuid'
-import { User, UserSession } from '../models/index.js'
+import { User, UserSession, IUser } from '../models/index.js'
 import { redis } from '../database/redis.js'
 import { config } from '../config/index.js'
 import { logger } from '../utils/logger.js'
@@ -91,7 +91,7 @@ export class MongoUserService {
       logger.error('用户注册失败:', error)
       
       // 处理Mongoose唯一约束错误
-      if (error.code === 11000) {
+      if (error instanceof Error && 'code' in error && error.code === 11000) {
         return {
           success: false,
           message: '用户名或邮箱已存在',
@@ -132,6 +132,12 @@ export class MongoUserService {
       }
 
       // 验证密码
+      if (!user.passwordHash) {
+        return {
+          success: false,
+          message: '用户名或密码错误',
+        }
+      }
       const isPasswordValid = await bcrypt.compare(password, user.passwordHash)
       if (!isPasswordValid) {
         return {
@@ -387,7 +393,7 @@ export class MongoUserService {
     try {
       const users = await User.getLeaderboard(limit)
       
-      const leaderboard: UserProfile[] = users.map(user => ({
+      const leaderboard: UserProfile[] = users.map((user: IUser) => ({
         userId: user.userId,
         username: user.username,
         displayName: user.displayName,
@@ -484,7 +490,7 @@ export class MongoUserService {
   private static async saveRefreshToken(userId: string, refreshToken: string): Promise<void> {
     try {
       const sessionId = uuidv4()
-      const expiresAt = new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)) // 7天后过期
+      // const expiresAt = new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)) // 7天后过期
       
       await UserSession.createSession(sessionId, userId, refreshToken, 7 * 24 * 60 * 60)
     } catch (error) {
@@ -499,7 +505,7 @@ export class MongoUserService {
   private static async verifyRefreshToken(userId: string, refreshToken: string): Promise<boolean> {
     try {
       const session = await UserSession.findByRefreshToken(refreshToken)
-      return session && session.userId === userId && session.isValid()
+      return !!session && session.userId === userId && session.isValid()
     } catch (error) {
       logger.error('验证refresh token失败:', error)
       return false
@@ -510,7 +516,7 @@ export class MongoUserService {
    * 更新刷新令牌
    */
   private static async updateRefreshToken(
-    userId: string, 
+    _userId: string, 
     oldToken: string, 
     newToken: string
   ): Promise<void> {

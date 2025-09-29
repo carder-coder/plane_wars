@@ -1,14 +1,13 @@
-import { v4 as uuidv4 } from 'uuid'
 import { Game, Room, User } from '../models/index.js'
 import { MongoUserService } from './mongoUserService.js'
 import { logger } from '../utils/logger.js'
 import { 
-  GameState,
-  IAirplanePosition,
-  ICoordinate,
+  AirplanePosition,
+  Coordinate,
   ApiResponse,
   PaginatedResponse 
 } from '../types/index.js'
+import { v4 as uuidv4 } from 'uuid'
 
 /**
  * 游戏服务类（MongoDB版本）
@@ -89,7 +88,7 @@ export class MongoGameService {
   public static async placePlane(
     gameId: string,
     playerId: string,
-    airplane: IAirplanePosition
+    airplane: AirplanePosition
   ): Promise<ApiResponse<any>> {
     try {
       const game = await Game.findOne({ gameId })
@@ -149,7 +148,7 @@ export class MongoGameService {
   public static async attack(
     gameId: string,
     attackerId: string,
-    coordinate: ICoordinate
+    coordinate: Coordinate
   ): Promise<ApiResponse<any>> {
     try {
       const game = await Game.findOne({ gameId })

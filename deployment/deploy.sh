@@ -16,7 +16,7 @@ NC='\033[0m'
 APP_NAME="airplane-battle"
 APP_USER="airplane"
 APP_DIR="/opt/airplane-battle"
-REPO_URL="https://github.com/your-username/airplane-battle-server.git"
+REPO_URL="https://github.com/carder-coder/airplane-battle-server.git"
 BRANCH="main"
 
 # 日志函数

@@ -1,4 +1,4 @@
-import { Schema, model, Document } from 'mongoose'
+import { Schema, model, Document, Model } from 'mongoose'
 
 /**
  * 坐标接口
@@ -30,10 +30,26 @@ export interface IAttackRecord {
   attackerId: string
 }
 
+// 定义实例方法的接口
+export interface IGameMethods {
+  placePlane(playerId: string, airplane: IAirplanePosition): boolean
+  attack(attackerId: string, coordinate: ICoordinate): string | null
+  validateAirplanePosition(airplane: IAirplanePosition): boolean
+  coordinateEquals(coord1: ICoordinate, coord2: ICoordinate): boolean
+  coordinateInArray(coordinate: ICoordinate, coordinates: ICoordinate[]): boolean
+}
+
+// 定义静态方法的接口
+export interface GameModel extends Model<IGame, {}, IGameMethods> {
+  findPlayerGames(playerId: string, page: number, limit: number): Promise<(IGame & IGameMethods)[]>
+  findActiveGames(): Promise<(IGame & IGameMethods)[]>
+  getPlayerStats(playerId: string): Promise<any[]>
+}
+
 /**
  * 游戏接口（MongoDB版本）
  */
-export interface IGame extends Document {
+export interface IGame extends Document, IGameMethods {
   gameId: string
   roomId: string
   player1Id: string
@@ -48,6 +64,11 @@ export interface IGame extends Document {
   attackHistory: IAttackRecord[]
   startedAt: Date
   finishedAt?: Date
+  
+  // 虚拟字段
+  isFinished: boolean
+  isInProgress: boolean
+  bothPlayersPlaced: boolean
 }
 
 /**
@@ -216,7 +237,7 @@ const gameSchema = new Schema<IGame>({
   timestamps: false,
   versionKey: false,
   toJSON: {
-    transform: function(doc, ret) {
+    transform: function(_doc, ret) {
       delete ret._id
       return ret
     }
@@ -286,7 +307,7 @@ gameSchema.methods.attack = function(attackerId: string, coordinate: ICoordinate
   }
   
   // 检查是否已经攻击过这个位置
-  const alreadyAttacked = this.attackHistory.some(attack => 
+  const alreadyAttacked = this.attackHistory.some((attack: IAttackRecord) => 
     attack.coordinate.x === coordinate.x && attack.coordinate.y === coordinate.y
   )
   
@@ -426,4 +447,4 @@ gameSchema.pre('save', function(next) {
 })
 
 // 创建模型
-export const Game = model<IGame>('Game', gameSchema)
+export const Game = model<IGame, GameModel>('Game', gameSchema)

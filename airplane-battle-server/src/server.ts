@@ -28,7 +28,7 @@ export class Server {
   private app: express.Application
   private httpServer: ReturnType<typeof createServer>
   private io: SocketServer
-  private socketManager: SocketManager
+  private socketManager: SocketManager | null = null
 
   constructor() {
     this.app = express()
@@ -72,7 +72,7 @@ export class Server {
     this.app.use(generalRateLimit)
 
     // 健康检查
-    this.app.get('/health', (req, res) => {
+    this.app.get('/health', (_req, res) => {
       res.json({
         success: true,
         message: '服务器运行正常',
@@ -102,7 +102,7 @@ export class Server {
     this.app.use(`${apiPrefix}/rooms`, roomRouter)
 
     // Socket统计信息路由
-    this.app.get(`${apiPrefix}/stats`, (req, res) => {
+    this.app.get(`${apiPrefix}/stats`, (_req, res) => {
       res.json({
         success: true,
         message: '服务器统计信息',
@@ -115,7 +115,7 @@ export class Server {
     // this.app.use(`${apiPrefix}/games`, gameRoutes)
 
     // 临时路由用于测试
-    this.app.get(`${apiPrefix}/test`, (req, res) => {
+    this.app.get(`${apiPrefix}/test`, (_req, res) => {
       res.json({
         success: true,
         message: 'API正常工作',

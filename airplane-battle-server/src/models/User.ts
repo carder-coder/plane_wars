@@ -1,4 +1,4 @@
-import { Schema, model, Document, Types } from 'mongoose'
+import { Schema, model, Document, Model } from 'mongoose'
 
 /**
  * 用户接口（MongoDB版本）
@@ -7,7 +7,7 @@ export interface IUser extends Document {
   userId: string
   username: string
   email: string
-  passwordHash: string
+  passwordHash?: string
   displayName?: string
   avatarUrl?: string
   level: number
@@ -18,6 +18,16 @@ export interface IUser extends Document {
   isActive: boolean
   createdAt: Date
   lastLogin?: Date
+
+  // 实例方法
+  updateStats(isWin: boolean, experienceGain?: number): void
+}
+
+// 定义 User 模型的静态方法接口
+interface IUserModel extends Model<IUser> {
+  findByUsername(username: string): Promise<IUser | null>
+  findByEmail(email: string): Promise<IUser | null>
+  getLeaderboard(limit: number): Promise<IUser[]>
 }
 
 /**
@@ -56,7 +66,6 @@ const userSchema = new Schema<IUser>({
   },
   passwordHash: {
     type: String,
-    required: true,
     minlength: 60 // bcrypt hash length
   },
   displayName: {
@@ -120,9 +129,9 @@ const userSchema = new Schema<IUser>({
   timestamps: false, // 我们手动管理时间戳
   versionKey: false,
   toJSON: {
-    transform: function(doc, ret) {
+    transform: function(_doc, ret) {
       delete ret._id
-      delete ret.passwordHash
+      ret.passwordHash = undefined
       return ret
     }
   }
@@ -183,4 +192,4 @@ userSchema.pre('save', function(next) {
 })
 
 // 创建模型
-export const User = model<IUser>('User', userSchema)
+export const User = model<IUser, IUserModel>('User', userSchema)

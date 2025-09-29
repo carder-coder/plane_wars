@@ -216,7 +216,7 @@ configure_systemd() {
     sudo tee /etc/systemd/system/airplane-battle.service > /dev/null <<EOF
 [Unit]
 Description=Airplane Battle Game Server
-Documentation=https://github.com/your-repo/airplane-battle
+Documentation=https://github.com/carder-coder/airplane-battle
 After=network.target mongod.service redis-server.service
 
 [Service]
@@ -458,19 +458,19 @@ main() {
     
     # 安装服务
     install_nodejs
-    install_mongodb
-    install_redis
-    install_nginx
+    #install_mongodb
+    #install_redis
+    #install_nginx
     
     # 配置系统
-    configure_firewall
+    #configure_firewall
     setup_app_user
     configure_systemd
     
     # 配置服务
-    configure_nginx
-    configure_mongodb
-    configure_redis
+    #configure_nginx
+    #configure_mongodb
+    #configure_redis
     
     # 其他配置
     configure_logrotate

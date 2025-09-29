@@ -46,10 +46,10 @@ export async function dropAllCollections(): Promise<void> {
   const { mongoose } = await import('../database/mongoConnection.js')
   
   try {
-    const collections = await mongoose.connection.db.listCollections().toArray()
+    const collections = await mongoose.connection.db?.listCollections().toArray()
     
-    for (const collection of collections) {
-      await mongoose.connection.db.dropCollection(collection.name)
+    for (const collection of collections || []) {
+      await mongoose.connection.db?.dropCollection(collection.name)
       console.log(`✓ 删除集合: ${collection.name}`)
     }
     

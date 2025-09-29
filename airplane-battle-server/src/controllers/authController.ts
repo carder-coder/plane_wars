@@ -197,7 +197,7 @@ export class UserController {
   /**
    * 获取用户排行榜
    */
-  public static async getLeaderboard(req: Request, res: Response): Promise<void> {
+  public static async getLeaderboard(_req: Request, res: Response): Promise<void> {
     try {
       // TODO: 实现排行榜逻辑
       res.json({
@@ -221,7 +221,7 @@ export class UserController {
   /**
    * 获取在线用户列表
    */
-  public static async getOnlineUsers(req: Request, res: Response): Promise<void> {
+  public static async getOnlineUsers(_req: Request, res: Response): Promise<void> {
     try {
       // TODO: 实现在线用户列表逻辑
       res.json({

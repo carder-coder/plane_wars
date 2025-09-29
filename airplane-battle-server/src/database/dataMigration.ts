@@ -59,7 +59,7 @@ export class DataMigration {
       this.logStep('migration_complete', 'success', '数据迁移完成')
       logger.info('数据库迁移成功完成！')
 
-    } catch (error) {
+    } catch (error: any) {
       this.logStep('migration_error', 'error', `迁移失败: ${error.message}`)
       logger.error('数据库迁移失败:', error)
       throw error
@@ -83,7 +83,7 @@ export class DataMigration {
       logger.info('MongoDB连接成功')
 
       this.logStep('database_connection', 'success', '数据库连接成功')
-    } catch (error) {
+    } catch (error: any) {
       this.logStep('database_connection', 'error', `数据库连接失败: ${error.message}`)
       throw error
     }
@@ -97,7 +97,7 @@ export class DataMigration {
       await this.pgClient.end()
       await mongoDatabase.disconnect()
       logger.info('数据库连接已关闭')
-    } catch (error) {
+    } catch (error: any) {
       logger.error('关闭数据库连接失败:', error)
     }
   }
@@ -116,7 +116,7 @@ export class DataMigration {
       }
 
       this.logStep('source_validation', 'success', '源数据验证完成')
-    } catch (error) {
+    } catch (error: any) {
       this.logStep('source_validation', 'error', `源数据验证失败: ${error.message}`)
       throw error
     }
@@ -132,9 +132,12 @@ export class DataMigration {
       
       for (const collection of collections) {
         try {
-          await mongoDatabase.getDatabase().collection(collection).drop()
-          logger.info(`清空集合: ${collection}`)
-        } catch (error) {
+          const db = mongoDatabase.getDatabase();
+          if (db) {
+            await db.collection(collection).drop()
+            logger.info(`清空集合: ${collection}`)
+          }
+        } catch (error: any) {
           // 集合不存在时会报错，忽略
           if (error.codeName !== 'NamespaceNotFound') {
             throw error
@@ -143,7 +146,7 @@ export class DataMigration {
       }
 
       this.logStep('mongodb_init', 'success', 'MongoDB初始化完成')
-    } catch (error) {
+    } catch (error: any) {
       this.logStep('mongodb_init', 'error', `MongoDB初始化失败: ${error.message}`)
       throw error
     }
@@ -198,15 +201,16 @@ export class DataMigration {
             lastLogin: user.last_login
           })
           migrated++
-        } catch (error) {
-          logger.error(`迁移用户失败 ${user.username}:`, error)
+        } catch (error: any) {
+          const username = user.username ?? 'unknown'
+          logger.error(`迁移用户失败 ${username}:`, error)
         }
       }
 
       this.logStep('user_migration', 'success', `用户数据迁移完成: ${migrated}/${users.length}`)
       logger.info(`用户数据迁移完成: ${migrated}/${users.length}`)
 
-    } catch (error) {
+    } catch (error: any) {
       this.logStep('user_migration', 'error', `用户数据迁移失败: ${error.message}`)
       throw error
     }
@@ -255,7 +259,7 @@ export class DataMigration {
       for (const room of rooms) {
         try {
           const members = Array.isArray(room.members) 
-            ? room.members.filter(member => member.userId) 
+            ? room.members.filter((member: any) => member.userId) 
             : []
 
           await Room.create({
@@ -272,15 +276,20 @@ export class DataMigration {
             updatedAt: room.updated_at
           })
           migrated++
-        } catch (error) {
-          logger.error(`迁移房间失败 ${room.room_name}:`, error)
+        } catch (error: any) {
+          const roomName = room.room_name ?? 'unknown'
+          logger.error(`迁移房间失败 ${roomName}:`, error)
         }
       }
 
-      this.logStep('room_migration', 'success', `房间数据迁移完成: ${migrated}/${rooms.length}`)
-      logger.info(`房间数据迁移完成: ${migrated}/${rooms.length}`)
+      if (migrated > 0) {
+        this.logStep('room_migration', 'success', `房间数据迁移完成: ${migrated}/${rooms.length}`)
+        logger.info(`房间数据迁移完成: ${migrated}/${rooms.length}`)
+      } else {
+        throw new Error(`所有房间迁移均失败`)
+      }
 
-    } catch (error) {
+    } catch (error: any) {
       this.logStep('room_migration', 'error', `房间数据迁移失败: ${error.message}`)
       throw error
     }
@@ -343,7 +352,7 @@ export class DataMigration {
       this.logStep('game_migration', 'success', `游戏数据迁移完成: ${migrated}/${games.length}`)
       logger.info(`游戏数据迁移完成: ${migrated}/${games.length}`)
 
-    } catch (error) {
+    } catch (error: any) {
       this.logStep('game_migration', 'error', `游戏数据迁移失败: ${error.message}`)
       throw error
     }
@@ -395,7 +404,7 @@ export class DataMigration {
       this.logStep('session_migration', 'success', `会话数据迁移完成: ${migrated}/${sessions.length}`)
       logger.info(`会话数据迁移完成: ${migrated}/${sessions.length}`)
 
-    } catch (error) {
+    } catch (error: any) {
       this.logStep('session_migration', 'error', `会话数据迁移失败: ${error.message}`)
       throw error
     }
@@ -445,7 +454,7 @@ export class DataMigration {
         throw new Error('迁移验证失败')
       }
 
-    } catch (error) {
+    } catch (error: any) {
       this.logStep('migration_validation', 'error', `迁移验证失败: ${error.message}`)
       throw error
     }
@@ -459,7 +468,7 @@ export class DataMigration {
       logger.info('开始创建索引...')
       await initializeIndexes()
       this.logStep('index_creation', 'success', '索引创建完成')
-    } catch (error) {
+    } catch (error: any) {
       this.logStep('index_creation', 'error', `索引创建失败: ${error.message}`)
       throw error
     }
@@ -508,7 +517,7 @@ export class DataMigration {
       console.log(`失败步骤: ${report.summary.errorSteps}`)
       console.log('================================\n')
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error('生成迁移报告失败:', error)
     }
   }

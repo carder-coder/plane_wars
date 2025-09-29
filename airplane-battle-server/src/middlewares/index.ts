@@ -9,7 +9,7 @@ export const errorHandler = (
   error: any,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void => {
   logger.error('服务器错误:', {
     error: error.message,
@@ -54,7 +54,7 @@ export const errorHandler = (
 export const notFoundHandler = (
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void => {
   logger.warn(`404错误: ${req.method} ${req.url}`)
   
@@ -144,7 +144,7 @@ export const gameRateLimit = rateLimit({
   },
   keyGenerator: (req) => {
     // 基于用户ID限流
-    return req.user?.userId || req.ip
+    return req.user?.userId || req.ip || 'anonymous'
   },
   handler: (req, res) => {
     logger.warn(`游戏限流触发: ${req.user?.userId || req.ip} ${req.method} ${req.url}`)

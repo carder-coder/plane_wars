@@ -67,15 +67,15 @@ export class SocketManager {
     socket.use((packet, next) => {
       try {
         // 验证消息格式
-        const [eventName, data] = packet
-        if (typeof eventName !== 'string') {
-          throw new Error('事件名称必须是字符串')
-        }
+        const [_eventName, _data] = packet
+        // if (typeof eventName !== 'string') {
+        //   throw new Error('事件名称必须是字符串')
+        // }
 
         next()
       } catch (error) {
         logger.error(`Socket中间件错误 ${socket.id}:`, error)
-        this.sendError(socket, 'INVALID_MESSAGE', error.message)
+        this.sendError(socket, 'INVALID_MESSAGE', (error as Error).message)
         next(new Error('消息格式错误'))
       }
     })
@@ -190,7 +190,7 @@ export class SocketManager {
   /**
    * 处理离开房间
    */
-  private async handleLeaveRoom(socket: Socket, data: any): Promise<void> {
+  private async handleLeaveRoom(socket: Socket, _data: any): Promise<void> {
     try {
       const connection = this.connections.get(socket.id)
       if (!connection) {
@@ -239,7 +239,7 @@ export class SocketManager {
   /**
    * 处理确认放置
    */
-  private async handleConfirmPlacement(socket: Socket, data: any): Promise<void> {
+  private async handleConfirmPlacement(socket: Socket, _data: any): Promise<void> {
     try {
       const connection = this.connections.get(socket.id)
       if (!connection) {
@@ -291,7 +291,7 @@ export class SocketManager {
   /**
    * 处理心跳
    */
-  private async handleHeartbeat(socket: Socket, data: any): Promise<void> {
+  private async handleHeartbeat(socket: Socket, _data: any): Promise<void> {
     try {
       const connection = this.connections.get(socket.id)
       if (connection) {

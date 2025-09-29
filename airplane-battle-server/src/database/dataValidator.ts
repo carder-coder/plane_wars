@@ -138,7 +138,7 @@ export class DataValidator {
       }
 
     } catch (error) {
-      this.recordValidation('basic_stats_validation', false, { error: error.message })
+      this.recordValidation('basic_stats_validation', false, { error: error instanceof Error ? error.message : String(error) })
       throw error
     }
   }
@@ -160,7 +160,7 @@ export class DataValidator {
       await this.validateGameIntegrity()
 
     } catch (error) {
-      this.recordValidation('data_integrity_validation', false, { error: error.message })
+      this.recordValidation('data_integrity_validation', false, { error: error instanceof Error ? error.message : String(error) })
       throw error
     }
   }
@@ -307,7 +307,7 @@ export class DataValidator {
       await this.validateSessionUserRelationships()
 
     } catch (error) {
-      this.recordValidation('relationships_validation', false, { error: error.message })
+      this.recordValidation('relationships_validation', false, { error: error instanceof Error ? error.message : String(error) })
       throw error
     }
   }
@@ -418,7 +418,7 @@ export class DataValidator {
       await this.validateBusinessRules()
 
     } catch (error) {
-      this.recordValidation('data_quality_validation', false, { error: error.message })
+      this.recordValidation('data_quality_validation', false, { error: error instanceof Error ? error.message : String(error) })
       throw error
     }
   }
@@ -548,7 +548,7 @@ export class DataValidator {
       })
 
     } catch (error) {
-      this.recordValidation('performance_test', false, { error: error.message })
+      this.recordValidation('performance_test', false, { error: error instanceof Error ? error.message : String(error) })
       throw error
     }
   }

@@ -1,4 +1,4 @@
-import { Schema, model, Document } from 'mongoose'
+import { Schema, model, Document, Model, Query } from 'mongoose'
 
 /**
  * 用户会话接口（MongoDB版本）
@@ -6,12 +6,39 @@ import { Schema, model, Document } from 'mongoose'
 export interface IUserSession extends Document {
   sessionId: string
   userId: string
-  refreshToken: string
+  refreshToken?: string
   ipAddress?: string
   userAgent?: string
   isActive: boolean
   createdAt: Date
   expiresAt: Date
+
+  // 实例方法
+  extend(additionalSeconds?: number): void
+  deactivate(): void
+  isValid(): boolean
+}
+
+// 定义 UserSession 模型的静态方法接口
+interface IUserSessionModel extends Model<IUserSession> {
+  findByRefreshToken(refreshToken: string): Promise<IUserSession | null>
+  findUserSessions(userId: string, activeOnly?: boolean): Query<IUserSession[], IUserSession>
+  deactivateUserSessions(userId: string): Query<{ acknowledged: boolean; modifiedCount: number }, IUserSession>
+  cleanupExpiredSessions(): Query<{ acknowledged: boolean; deletedCount: number }, IUserSession>
+  createSession(
+    sessionId: string,
+    userId: string,
+    refreshToken: string,
+    expiresIn?: number,
+    ipAddress?: string,
+    userAgent?: string
+  ): Promise<IUserSession>
+  refreshSession(
+    oldRefreshToken: string,
+    newRefreshToken: string,
+    expiresIn?: number
+  ): Query<IUserSession | null, IUserSession>
+  startCleanupTask(): void
 }
 
 /**
@@ -70,10 +97,12 @@ const userSessionSchema = new Schema<IUserSession>({
   timestamps: false,
   versionKey: false,
   toJSON: {
-    transform: function(doc, ret) {
-      delete ret._id
-      delete ret.refreshToken // 敏感信息不返回
-      return ret
+    transform: function(_doc, ret) {
+      const transformed = { ...ret };
+      // 移除 _id 和敏感字段
+      delete transformed._id;
+      transformed.refreshToken = undefined;
+      return transformed;
     }
   }
 })
@@ -210,8 +239,8 @@ userSessionSchema.statics.startCleanupTask = function() {
   // 每小时清理一次过期会话
   setInterval(async () => {
     try {
-      const result = await this.cleanupExpiredSessions()
-      if (result.deletedCount > 0) {
+      const result = await (this as any).cleanupExpiredSessions?.()
+      if (result && result.deletedCount > 0) {
         console.log(`清理了 ${result.deletedCount} 个过期会话`)
       }
     } catch (error) {
@@ -221,4 +250,4 @@ userSessionSchema.statics.startCleanupTask = function() {
 }
 
 // 创建模型
-export const UserSession = model<IUserSession>('UserSession', userSessionSchema)
+export const UserSession = model<IUserSession, IUserSessionModel>('UserSession', userSessionSchema)

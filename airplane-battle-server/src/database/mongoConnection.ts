@@ -38,7 +38,6 @@ export class MongoDatabase {
         serverSelectionTimeoutMS: 5000, // 服务器选择超时
         socketTimeoutMS: 45000, // Socket超时
         bufferCommands: false, // 禁用mongoose缓冲
-        bufferMaxEntries: 0, // 禁用mongoose缓冲
       })
 
       this.isConnected = true
@@ -94,7 +93,7 @@ export class MongoDatabase {
         await this.connect()
       }
       
-      await mongoose.connection.db.admin().ping()
+      await mongoose.connection.db?.admin().ping()
       logger.info('MongoDB连接测试成功')
       return true
     } catch (error) {
@@ -150,7 +149,12 @@ export class MongoDatabase {
    */
   public async aggregate<T>(collection: string, pipeline: any[]): Promise<T[]> {
     try {
-      const result = await mongoose.connection.db
+      const db = mongoose.connection.db
+      if (!db) {
+        throw new Error('Database connection not available')
+      }
+      
+      const result = await db
         .collection(collection)
         .aggregate(pipeline)
         .toArray()
