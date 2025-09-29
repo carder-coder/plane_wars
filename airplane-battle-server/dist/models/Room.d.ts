@@ -17,6 +17,7 @@ export interface IRoom extends Document {
     members: IRoomMember[];
     createdAt: Date;
     updatedAt: Date;
+    isHostCreated: boolean;
     needPassword?: boolean;
     isFull?: boolean;
     isEmpty?: boolean;
@@ -25,11 +26,15 @@ export interface IRoom extends Document {
     setMemberReady(userId: string, isReady: boolean): boolean;
     areAllMembersReady(): boolean;
     startGame(): boolean;
+    dissolveRoom(): boolean;
+    transferHost(newHostId: string): boolean;
 }
 export interface IRoomModel extends Model<IRoom> {
     findWaitingRooms(page: number, limit: number): Promise<IRoom[]>;
     findUserRooms(userId: string): Promise<IRoom[]>;
     findByRoomId(roomId: string): Promise<IRoom | null>;
+    findActiveRoomByHost(hostUserId: string): Promise<IRoom | null>;
+    generateRoomId(hostUserId: string): string;
 }
 export declare const Room: IRoomModel;
 //# sourceMappingURL=Room.d.ts.map

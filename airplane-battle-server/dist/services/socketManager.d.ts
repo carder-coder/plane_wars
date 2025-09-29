@@ -22,6 +22,9 @@ export declare class SocketManager {
     sendToUser(userId: string, type: MessageType, payload: any): void;
     private generateMessageId;
     getOnlineUserCount(): number;
+    notifyRoomDissolved(roomId: string, reason?: string): void;
+    notifyPlayerKicked(roomId: string, kickedUserId: string, reason?: string): void;
+    notifyHostTransferred(roomId: string, oldHostId: string, newHostId: string, newHostUsername: string): void;
     getStats(): object;
 }
 //# sourceMappingURL=socketManager.d.ts.map

@@ -68,4 +68,39 @@ roomRouter.delete(
   RoomController.leaveRoom
 )
 
+/**
+ * @route GET /api/rooms/reconnect
+ * @desc 检查用户重连状态
+ * @access Private
+ */
+roomRouter.get(
+  '/reconnect',
+  authenticate,
+  RoomController.checkReconnect
+)
+
+/**
+ * @route DELETE /api/rooms/:roomId/dissolve
+ * @desc 解散房间（房主权限）
+ * @access Private
+ */
+roomRouter.delete(
+  '/:roomId/dissolve',
+  authenticate,
+  gameRateLimit,
+  RoomController.dissolveRoom
+)
+
+/**
+ * @route POST /api/rooms/:roomId/kick
+ * @desc 踢出玩家（房主权限）
+ * @access Private
+ */
+roomRouter.post(
+  '/:roomId/kick',
+  authenticate,
+  gameRateLimit,
+  RoomController.kickPlayer
+)
+
 export { roomRouter }

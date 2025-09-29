@@ -30,7 +30,7 @@ export default defineConfig({
   define: {
     __API_URL__: JSON.stringify(process.env.NODE_ENV === 'production' 
       ? '/api' 
-      : 'http://localhost:3001/api'
+      : 'http://120.26.106.214:3001/api'
     )
   }
 })

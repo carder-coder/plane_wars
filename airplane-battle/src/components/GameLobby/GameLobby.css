@@ -1,0 +1,269 @@
+.game-lobby {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  padding: 20px;
+}
+
+.lobby-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.lobby-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.leave-button {
+  border-radius: 8px;
+  height: 40px;
+}
+
+.room-info {
+  text-align: center;
+  flex: 1;
+}
+
+.room-name {
+  margin: 0 !important;
+  color: #1f2937;
+  margin-bottom: 8px !important;
+}
+
+.lobby-content {
+  gap: 24px;
+}
+
+.left-panel, .right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.players-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.player-card {
+  margin-bottom: 12px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.player-card.current-user {
+  border-color: #1890ff;
+  background-color: #f0f8ff;
+}
+
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.player-avatar {
+  border: 2px solid #e5e7eb;
+}
+
+.current-user .player-avatar {
+  border-color: #1890ff;
+}
+
+.player-details {
+  flex: 1;
+}
+
+.player-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.host-icon {
+  color: #f59e0b;
+  font-size: 14px;
+}
+
+.player-stats {
+  display: flex;
+  gap: 12px;
+}
+
+.player-level, .player-rating {
+  font-size: 12px;
+}
+
+.player-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.empty-slot {
+  margin-bottom: 12px;
+  border: 2px dashed #d1d5db;
+  background-color: #f9fafb;
+}
+
+.empty-slot-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.empty-avatar {
+  background-color: #e5e7eb;
+  color: #9ca3af;
+}
+
+.control-panel {
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.control-buttons {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.ready-button {
+  min-width: 120px;
+  height: 44px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.ready-button.ready {
+  background-color: #dc2626;
+  border-color: #dc2626;
+  color: white;
+}
+
+.ready-button.not-ready {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+}
+
+.start-button {
+  min-width: 120px;
+  height: 44px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  font-weight: 600;
+}
+
+.start-hint {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.chat-card {
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.chat-card .ant-card-body {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 57px);
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.no-messages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.chat-message {
+  border-bottom: none !important;
+  padding: 8px 0;
+}
+
+.message-content {
+  width: 100%;
+}
+
+.message-user {
+  color: #1890ff;
+  margin-right: 8px;
+}
+
+.message-text {
+  display: block;
+  margin: 4px 0;
+  word-wrap: break-word;
+}
+
+.message-time {
+  font-size: 11px;
+}
+
+.chat-input {
+  padding: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.send-button {
+  height: auto;
+  min-height: 32px;
+  border-radius: 0 6px 6px 0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .game-lobby {
+    padding: 12px;
+  }
+  
+  .lobby-header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  
+  .lobby-content {
+    flex-direction: column;
+  }
+  
+  .player-info {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .control-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .ready-button,
+  .start-button {
+    width: 100%;
+  }
+  
+  .chat-card {
+    height: 300px;
+  }
+}

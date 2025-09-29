@@ -1,0 +1,153 @@
+.main-menu {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.main-menu-container {
+  display: flex;
+  gap: 24px;
+  max-width: 1000px;
+  width: 100%;
+}
+
+.user-info-card {
+  flex: 1;
+  max-width: 400px;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+}
+
+.user-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.user-avatar {
+  border: 3px solid #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.user-details {
+  flex: 1;
+}
+
+.username {
+  margin-bottom: 8px !important;
+  color: #1f2937;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.user-stats {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.menu-actions-card {
+  flex: 1;
+  max-width: 400px;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+}
+
+.menu-title {
+  text-align: center;
+  color: #1f2937;
+  margin-bottom: 24px !important;
+}
+
+.menu-buttons {
+  width: 100%;
+}
+
+.menu-button {
+  height: 56px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.primary-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.primary-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.menu-button:not(.primary-button) {
+  border: 2px solid #e5e7eb;
+  background: white;
+  color: #374151;
+}
+
+.menu-button:not(.primary-button):hover {
+  border-color: #667eea;
+  color: #667eea;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.secondary-buttons .ant-btn {
+  height: 40px;
+  border-radius: 8px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .main-menu-container {
+    flex-direction: column;
+    max-width: 500px;
+  }
+  
+  .user-info-card,
+  .menu-actions-card {
+    max-width: none;
+  }
+  
+  .user-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .user-stats {
+    justify-content: space-between;
+    padding: 0 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-menu {
+    padding: 12px;
+  }
+  
+  .menu-button {
+    height: 48px;
+    font-size: 14px;
+  }
+}

@@ -9,5 +9,8 @@ roomRouter.post('/', authenticate, gameRateLimit, validate(createRoomSchema), Ro
 roomRouter.get('/:roomId', authenticate, RoomController.getRoomDetails);
 roomRouter.post('/join', authenticate, gameRateLimit, validate(joinRoomSchema), RoomController.joinRoom);
 roomRouter.delete('/:roomId/leave', authenticate, gameRateLimit, RoomController.leaveRoom);
+roomRouter.get('/reconnect', authenticate, RoomController.checkReconnect);
+roomRouter.delete('/:roomId/dissolve', authenticate, gameRateLimit, RoomController.dissolveRoom);
+roomRouter.post('/:roomId/kick', authenticate, gameRateLimit, RoomController.kickPlayer);
 export { roomRouter };
 //# sourceMappingURL=rooms.js.map

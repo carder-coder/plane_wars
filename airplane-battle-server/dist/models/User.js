@@ -91,6 +91,11 @@ const userSchema = new Schema({
     lastLogin: {
         type: Date,
         index: true
+    },
+    currentRoomId: {
+        type: String,
+        default: null,
+        index: true
     }
 }, {
     timestamps: false,
@@ -125,6 +130,12 @@ userSchema.methods.updateStats = function (isWin, experienceGain = 10) {
         this.experience -= nextLevelExp;
     }
 };
+userSchema.methods.updateCurrentRoom = function (roomId) {
+    this.currentRoomId = roomId || null;
+};
+userSchema.methods.clearCurrentRoom = function () {
+    this.currentRoomId = null;
+};
 userSchema.statics.findByUsername = function (username) {
     return this.findOne({ username, isActive: true });
 };
@@ -136,6 +147,10 @@ userSchema.statics.getLeaderboard = function (limit = 10) {
         .sort({ rating: -1, wins: -1 })
         .limit(limit)
         .select('userId username displayName level rating wins losses');
+};
+userSchema.statics.findUsersInRoom = function (roomId) {
+    return this.find({ currentRoomId: roomId, isActive: true })
+        .select('userId username displayName level rating avatarUrl');
 };
 userSchema.pre('save', function (next) {
     if (this.isNew) {

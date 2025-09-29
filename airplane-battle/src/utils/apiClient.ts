@@ -118,16 +118,38 @@ export class ApiClient {
   }
 
   // 房间相关API
-  public async getRoomList(page = 1, limit = 10) {
-    return this.get(`/rooms?page=${page}&limit=${limit}`)
+  public async getRoomList(page = 1, limit = 20, filters?: {
+    status?: 'waiting' | 'playing' | 'all'
+    type?: 'public' | 'private' | 'all'
+    search?: string
+  }) {
+    let query = `page=${page}&limit=${limit}`
+    
+    if (filters?.status && filters.status !== 'all') {
+      query += `&status=${filters.status}`
+    }
+    
+    if (filters?.type && filters.type !== 'all') {
+      query += `&type=${filters.type}`
+    }
+    
+    if (filters?.search) {
+      query += `&search=${encodeURIComponent(filters.search)}`
+    }
+    
+    return this.get(`/rooms?${query}`)
   }
 
   public async createRoom(roomData: {
     roomName: string
     roomType: 'public' | 'private'
     password?: string
+    maxPlayers?: number
   }) {
-    return this.post('/rooms', roomData)
+    return this.post('/rooms', {
+      ...roomData,
+      maxPlayers: roomData.maxPlayers || 2
+    })
   }
 
   public async getRoomDetails(roomId: string) {
@@ -141,10 +163,28 @@ export class ApiClient {
     return this.post('/rooms/join', roomData)
   }
 
-  public async leaveRoom(roomId: string) {
-    return this.delete(`/rooms/${roomId}/leave`)
+  public async updatePlayerReady(roomId: string, isReady: boolean) {
+    return this.put(`/rooms/${roomId}/ready`, { isReady })
+  }
+
+  public async quickJoin() {
+    return this.post('/rooms/quick-join')
+  }
+
+  // 重连相关API
+  public async checkReconnect() {
+    return this.get('/rooms/reconnect')
+  }
+
+  // 房主权限API
+  public async dissolveRoom(roomId: string) {
+    return this.delete(`/rooms/${roomId}/dissolve`)
+  }
+
+  public async kickPlayer(roomId: string, targetUserId: string) {
+    return this.post(`/rooms/${roomId}/kick`, { targetUserId })
   }
 }
 
 // 导出API客户端实例
-export const apiClient = new ApiClient(import.meta.env.VITE_API_URL || 'http://localhost:3001/api')
+export const apiClient = new ApiClient(import.meta.env.VITE_API_URL || 'http://120.26.106.214:3001/api')

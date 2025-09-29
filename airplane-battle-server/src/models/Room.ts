@@ -25,6 +25,7 @@ export interface IRoom extends Document {
   members: IRoomMember[]
   createdAt: Date
   updatedAt: Date
+  isHostCreated: boolean
 
   // 虚拟属性
   needPassword?: boolean
@@ -37,6 +38,8 @@ export interface IRoom extends Document {
   setMemberReady(userId: string, isReady: boolean): boolean
   areAllMembersReady(): boolean
   startGame(): boolean
+  dissolveRoom(): boolean
+  transferHost(newHostId: string): boolean
 }
 
 // 添加静态方法接口
@@ -44,6 +47,8 @@ export interface IRoomModel extends Model<IRoom> {
   findWaitingRooms(page: number, limit: number): Promise<IRoom[]>
   findUserRooms(userId: string): Promise<IRoom[]>
   findByRoomId(roomId: string): Promise<IRoom | null>
+  findActiveRoomByHost(hostUserId: string): Promise<IRoom | null>
+  generateRoomId(hostUserId: string): string
 }
 
 /**
@@ -148,6 +153,11 @@ const roomSchema = new Schema<IRoom>({
   updatedAt: {
     type: Date,
     default: Date.now
+  },
+  isHostCreated: {
+    type: Boolean,
+    default: true,
+    index: true
   }
 }, {
   timestamps: false, // 我们手动管理时间戳
@@ -188,7 +198,8 @@ roomSchema.methods.addMember = function(this: IRoom, userId: string): boolean {
   // 检查用户是否已在房间中
   const existingMember = this.members.find((member: IRoomMember) => member.userId === userId)
   if (existingMember) {
-    return false
+    // 如果用户已在房间中，返回true（支持重复加入）
+    return true
   }
   
   // 确定玩家编号
@@ -218,13 +229,10 @@ roomSchema.methods.removeMember = function(this: IRoom, userId: string): boolean
   this.currentPlayers -= 1
   this.updatedAt = new Date()
   
-  // 如果房主离开且还有其他成员，转移房主权限
-  if (this.hostUserId === userId && this.members.length > 0) {
-    // 按加入时间排序，选择最早加入的成员作为新房主
-    const newHost = this.members.sort((a: IRoomMember, b: IRoomMember) => 
-      a.joinedAt.getTime() - b.joinedAt.getTime()
-    )[0]
-    this.hostUserId = newHost.userId
+  // 如果房主离开，则解散房间（根据新设计）
+  if (this.hostUserId === userId) {
+    this.dissolveRoom()
+    return true
   }
   
   // 如果房间变空，标记为已结束
@@ -263,6 +271,27 @@ roomSchema.methods.startGame = function(this: IRoom): boolean {
   return true
 }
 
+// 解散房间方法
+roomSchema.methods.dissolveRoom = function(this: IRoom): boolean {
+  this.status = 'finished'
+  this.members = []
+  this.currentPlayers = 0
+  this.updatedAt = new Date()
+  return true
+}
+
+// 转移房主方法
+roomSchema.methods.transferHost = function(this: IRoom, newHostId: string): boolean {
+  const newHost = this.members.find((member: IRoomMember) => member.userId === newHostId)
+  if (!newHost) {
+    return false
+  }
+  
+  this.hostUserId = newHostId
+  this.updatedAt = new Date()
+  return true
+}
+
 // 静态方法
 roomSchema.statics.findWaitingRooms = function(page: number = 1, limit: number = 10) {
   const skip = (page - 1) * limit
@@ -284,6 +313,21 @@ roomSchema.statics.findUserRooms = function(userId: string) {
 
 roomSchema.statics.findByRoomId = function(roomId: string) {
   return this.findOne({ roomId })
+}
+
+// 查找用户的活跃房间（房主创建的未开始房间）
+roomSchema.statics.findActiveRoomByHost = function(hostUserId: string) {
+  return this.findOne({
+    hostUserId,
+    status: 'waiting',
+    isHostCreated: true
+  })
+}
+
+// 生成房间ID（格式：{userId}_{timestamp}）
+roomSchema.statics.generateRoomId = function(hostUserId: string) {
+  const timestamp = Date.now()
+  return `${hostUserId}_${timestamp}`
 }
 
 // 中间件

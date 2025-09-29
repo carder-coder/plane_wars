@@ -109,13 +109,18 @@ export const gameRateLimit = rateLimit({
 export const corsOptions = {
     origin: (origin, callback) => {
         const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173'];
-        if (!origin)
+        logger.info(`CORS检查: 请求来源=${origin}, 允许的源=${allowedOrigins.join(', ')}`);
+        if (!origin) {
+            logger.info('CORS允许: 无来源请求（如API工具或移动应用）');
             return callback(null, true);
+        }
         if (allowedOrigins.includes(origin)) {
+            logger.info(`CORS允许: ${origin}`);
             callback(null, true);
         }
         else {
             logger.warn(`CORS拒绝来源: ${origin}`);
+            logger.warn(`允许的来源列表: ${allowedOrigins.join(', ')}`);
             callback(new Error('CORS策略不允许此来源'));
         }
     },

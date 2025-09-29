@@ -18,9 +18,12 @@ export interface IUser extends Document {
   isActive: boolean
   createdAt: Date
   lastLogin?: Date
+  currentRoomId?: string
 
   // 实例方法
   updateStats(isWin: boolean, experienceGain?: number): void
+  updateCurrentRoom(roomId?: string): void
+  clearCurrentRoom(): void
 }
 
 // 定义 User 模型的静态方法接口
@@ -28,6 +31,7 @@ interface IUserModel extends Model<IUser> {
   findByUsername(username: string): Promise<IUser | null>
   findByEmail(email: string): Promise<IUser | null>
   getLeaderboard(limit: number): Promise<IUser[]>
+  findUsersInRoom(roomId: string): Promise<IUser[]>
 }
 
 /**
@@ -124,6 +128,11 @@ const userSchema = new Schema<IUser>({
   lastLogin: {
     type: Date,
     index: true
+  },
+  currentRoomId: {
+    type: String,
+    default: null,
+    index: true
   }
 }, {
   timestamps: false, // 我们手动管理时间戳
@@ -167,6 +176,14 @@ userSchema.methods.updateStats = function(isWin: boolean, experienceGain: number
   }
 }
 
+userSchema.methods.updateCurrentRoom = function(roomId?: string) {
+  this.currentRoomId = roomId || null
+}
+
+userSchema.methods.clearCurrentRoom = function() {
+  this.currentRoomId = null
+}
+
 // 静态方法
 userSchema.statics.findByUsername = function(username: string) {
   return this.findOne({ username, isActive: true })
@@ -181,6 +198,11 @@ userSchema.statics.getLeaderboard = function(limit: number = 10) {
     .sort({ rating: -1, wins: -1 })
     .limit(limit)
     .select('userId username displayName level rating wins losses')
+}
+
+userSchema.statics.findUsersInRoom = function(roomId: string) {
+  return this.find({ currentRoomId: roomId, isActive: true })
+    .select('userId username displayName level rating avatarUrl')
 }
 
 // 中间件

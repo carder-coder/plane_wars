@@ -1,12 +1,13 @@
-import { Game, Room, User } from '../models/index.js'
-import { MongoUserService } from './mongoUserService.js'
+import { Game, Room, User, IGame } from '../models/index.js'
 import { logger } from '../utils/logger.js'
 import { 
+  GamePhase, 
+  ApiResponse,
   AirplanePosition,
   Coordinate,
-  ApiResponse,
-  PaginatedResponse 
+  PaginatedResponse
 } from '../types/index.js'
+import { MongoUserService } from './mongoUserService.js'
 import { v4 as uuidv4 } from 'uuid'
 
 /**
@@ -560,6 +561,126 @@ export class MongoGameService {
       return {
         success: false,
         message: '投降失败'
+      }
+    }
+  }
+
+  /**
+   * 清理过期游戏
+   */
+  public static async cleanupExpiredGames(): Promise<ApiResponse<number>> {
+    try {
+      const expiryTime = new Date(Date.now() - 24 * 60 * 60 * 1000) // 24小时前
+      
+      // 查找过期的游戏
+      const expiredGames = await Game.find({
+        updatedAt: { $lt: expiryTime },
+        $or: [
+          { currentPhase: GamePhase.FINISHED },
+          { currentPhase: GamePhase.WAITING },
+          { currentPhase: GamePhase.PLACEMENT }
+        ]
+      })
+
+      // 删除过期游戏
+      const deletedCount = await Game.deleteMany({
+        _id: { $in: expiredGames.map(g => g._id) }
+      })
+
+      logger.info(`清理了 ${deletedCount.deletedCount} 个过期游戏`)
+
+      return {
+        success: true,
+        message: '过期游戏清理完成',
+        data: deletedCount.deletedCount
+      }
+    } catch (error) {
+      logger.error('清理过期游戏失败:', error)
+      return {
+        success: false,
+        message: '清理过期游戏失败',
+        error: { code: 'CLEANUP_GAMES_FAILED' }
+      }
+    }
+  }
+
+  /**
+   * 批量更新游戏状态
+   */
+  public static async batchUpdateGameStatus(): Promise<ApiResponse<number>> {
+    try {
+      // 查找需要更新的游戏（超过一定时间未活动的进行中游戏）
+      const inactiveThreshold = new Date(Date.now() - 30 * 60 * 1000) // 30分钟前
+      
+      const games = await Game.find({
+        currentPhase: GamePhase.BATTLE,
+        startedAt: { $lt: inactiveThreshold }
+      })
+
+      // 更新每个游戏的状态
+      const updatedCount = await Promise.all(
+        games.map(async (game: IGame) => {
+          // 检查是否真的处于非活跃状态
+          // 这里可以根据具体需求实现更复杂的逻辑
+          game.currentPhase = GamePhase.FINISHED
+          await game.save()
+          return game._id
+        })
+      )
+
+      logger.info(`批量更新了 ${updatedCount.length} 个游戏状态`)
+
+      return {
+        success: true,
+        message: '游戏状态批量更新完成',
+        data: updatedCount.length
+      }
+    } catch (error) {
+      logger.error('批量更新游戏状态失败:', error)
+      return {
+        success: false,
+        message: '批量更新游戏状态失败',
+        error: { code: 'BATCH_UPDATE_GAMES_FAILED' }
+      }
+    }
+  }
+
+  /**
+   * 获取游戏历史记录
+   */
+  public static async getGameHistory(
+    playerId: string, 
+    page: number = 1, 
+    limit: number = 10
+  ): Promise<ApiResponse<any>> {
+    try {
+      const games = await Game.findPlayerGames(playerId, page, limit)
+      
+      const history = games.map(game => ({
+        gameId: game.gameId,
+        roomId: game.roomId,
+        phase: game.currentPhase,
+        winnerId: game.winnerId,
+        startedAt: game.startedAt,
+        finishedAt: game.finishedAt
+      }))
+      
+      return {
+        success: true,
+        message: '获取游戏历史记录成功',
+        data: {
+          items: history,
+          page,
+          limit,
+          total: history.length
+        }
+      }
+    } catch (error) {
+      logger.error('获取游戏历史记录失败:', error)
+      return {
+        success: false,
+        message: '获取游戏历史记录失败',
+        error: { code: 'GET_GAME_HISTORY_FAILED' }
       }
     }
   }

@@ -40,7 +40,7 @@ export async function initializeIndexes() {
         }
         catch (error) {
             if (error.code === 85) {
-                console.log('✓ 游戏索引已存在（跳过冒突）');
+                console.log('✓ 游戏索引已存在（跳过冗突）');
             }
             else {
                 throw error;

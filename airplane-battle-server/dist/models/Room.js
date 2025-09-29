@@ -92,6 +92,11 @@ const roomSchema = new Schema({
     updatedAt: {
         type: Date,
         default: Date.now
+    },
+    isHostCreated: {
+        type: Boolean,
+        default: true,
+        index: true
     }
 }, {
     timestamps: false,
@@ -121,7 +126,7 @@ roomSchema.methods.addMember = function (userId) {
     }
     const existingMember = this.members.find((member) => member.userId === userId);
     if (existingMember) {
-        return false;
+        return true;
     }
     const playerNumber = this.currentPlayers + 1;
     this.members.push({
@@ -142,9 +147,9 @@ roomSchema.methods.removeMember = function (userId) {
     this.members.splice(memberIndex, 1);
     this.currentPlayers -= 1;
     this.updatedAt = new Date();
-    if (this.hostUserId === userId && this.members.length > 0) {
-        const newHost = this.members.sort((a, b) => a.joinedAt.getTime() - b.joinedAt.getTime())[0];
-        this.hostUserId = newHost.userId;
+    if (this.hostUserId === userId) {
+        this.dissolveRoom();
+        return true;
     }
     if (this.currentPlayers === 0) {
         this.status = 'finished';
@@ -172,6 +177,22 @@ roomSchema.methods.startGame = function () {
     this.updatedAt = new Date();
     return true;
 };
+roomSchema.methods.dissolveRoom = function () {
+    this.status = 'finished';
+    this.members = [];
+    this.currentPlayers = 0;
+    this.updatedAt = new Date();
+    return true;
+};
+roomSchema.methods.transferHost = function (newHostId) {
+    const newHost = this.members.find((member) => member.userId === newHostId);
+    if (!newHost) {
+        return false;
+    }
+    this.hostUserId = newHostId;
+    this.updatedAt = new Date();
+    return true;
+};
 roomSchema.statics.findWaitingRooms = function (page = 1, limit = 10) {
     const skip = (page - 1) * limit;
     return this.find({ status: 'waiting' })
@@ -190,6 +211,17 @@ roomSchema.statics.findUserRooms = function (userId) {
 };
 roomSchema.statics.findByRoomId = function (roomId) {
     return this.findOne({ roomId });
+};
+roomSchema.statics.findActiveRoomByHost = function (hostUserId) {
+    return this.findOne({
+        hostUserId,
+        status: 'waiting',
+        isHostCreated: true
+    });
+};
+roomSchema.statics.generateRoomId = function (hostUserId) {
+    const timestamp = Date.now();
+    return `${hostUserId}_${timestamp}`;
 };
 roomSchema.pre('save', function (next) {
     if (this.isNew) {

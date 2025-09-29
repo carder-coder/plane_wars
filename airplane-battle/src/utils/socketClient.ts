@@ -1,5 +1,5 @@
 import { io, Socket } from 'socket.io-client'
-import { MessageType, SocketMessage, ConnectionStatus } from '../types/network'
+import { MessageType, SocketMessage, ConnectionStatus, SocketError, SocketAuthStatus } from '../types/network'
 import { logger } from './logger'
 
 /**
@@ -12,6 +12,8 @@ export class SocketClient {
   private reconnectAttempts = 0
   private maxReconnectAttempts = 5
   private reconnectDelay = 1000
+  private authErrorHandler: ((error: SocketError) => void) | null = null
+  private authStatus: SocketAuthStatus = SocketAuthStatus.DISCONNECTED
 
   /**
    * 连接到服务器
@@ -29,6 +31,7 @@ export class SocketClient {
       }
 
       this.isConnecting = true
+      this.authStatus = SocketAuthStatus.CONNECTING
       logger.info(`正在连接到服务器: ${serverUrl}`)
 
       this.socket = io(serverUrl, {
@@ -43,6 +46,11 @@ export class SocketClient {
       return new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
           this.isConnecting = false
+          this.authStatus = SocketAuthStatus.AUTH_FAILED
+          this.handleAuthError({
+            code: 'CONNECTION_ERROR',
+            message: '连接超时'
+          })
           reject(new Error('连接超时'))
         }, 10000)
 
@@ -50,31 +58,65 @@ export class SocketClient {
           clearTimeout(timeout)
           this.isConnecting = false
           this.reconnectAttempts = 0
+          this.authStatus = SocketAuthStatus.AUTHENTICATING
           logger.info('Socket连接成功')
           
           // 发送认证消息
           this.socket!.emit('authenticate', { token })
-          resolve(true)
         })
 
         this.socket!.on('authenticated', (data) => {
+          this.authStatus = SocketAuthStatus.AUTHENTICATED
           logger.info('Socket认证成功:', data)
+          resolve(true)
+        })
+
+        this.socket!.on('auth_failed', (error) => {
+          clearTimeout(timeout)
+          this.isConnecting = false
+          this.authStatus = SocketAuthStatus.AUTH_FAILED
+          
+          const authError: SocketError = {
+            code: 'AUTH_FAILED',
+            message: error.message || '认证失败',
+            details: error
+          }
+          
+          logger.error('Socket认证失败:', authError)
+          this.handleAuthError(authError)
+          reject(authError)
         })
 
         this.socket!.on('connect_error', (error) => {
           clearTimeout(timeout)
           this.isConnecting = false
-          logger.error('Socket连接错误:', error)
-          reject(error)
+          this.authStatus = SocketAuthStatus.AUTH_FAILED
+          
+          const connectionError: SocketError = {
+            code: 'CONNECTION_ERROR',
+            message: '连接失败',
+            details: error
+          }
+          
+          logger.error('Socket连接错误:', connectionError)
+          this.handleAuthError(connectionError)
+          reject(connectionError)
         })
 
         this.socket!.on('disconnect', (reason) => {
+          this.authStatus = SocketAuthStatus.DISCONNECTED
           logger.warn('Socket断开连接:', reason)
           this.handleDisconnect(reason)
         })
 
         this.socket!.on('error', (error) => {
           logger.error('Socket错误:', error)
+          
+          // 如果是认证相关错误，特殊处理
+          if (error.code && ['AUTH_FAILED', 'TOKEN_EXPIRED', 'MISSING_TOKEN'].includes(error.code)) {
+            this.authStatus = SocketAuthStatus.AUTH_FAILED
+            this.handleAuthError(error as SocketError)
+          }
         })
 
         // 设置消息监听器
@@ -82,6 +124,7 @@ export class SocketClient {
       })
     } catch (error) {
       this.isConnecting = false
+      this.authStatus = SocketAuthStatus.AUTH_FAILED
       logger.error('Socket连接失败:', error)
       throw error
     }
@@ -92,9 +135,15 @@ export class SocketClient {
    */
   public disconnect(): void {
     if (this.socket) {
+      this.socket.removeAllListeners()
       this.socket.disconnect()
       this.socket = null
-      logger.info('Socket已断开连接')
+      this.authStatus = SocketAuthStatus.DISCONNECTED
+      this.messageHandlers.clear()
+      this.authErrorHandler = null
+      this.isConnecting = false
+      this.reconnectAttempts = 0
+      logger.info('Socket已断开连接并清理所有状态')
     }
   }
 
@@ -167,6 +216,20 @@ export class SocketClient {
   }
 
   /**
+   * 切换玩家准备状态
+   */
+  public toggleReady(isReady: boolean): void {
+    this.sendMessage(MessageType.PLAYER_READY, { isReady })
+  }
+
+  /**
+   * 发送聊天消息
+   */
+  public sendChatMessage(message: string): void {
+    this.sendMessage(MessageType.CHAT_MESSAGE, { message, timestamp: new Date() })
+  }
+
+  /**
    * 获取连接状态
    */
   public getConnectionStatus(): ConnectionStatus {
@@ -174,6 +237,31 @@ export class SocketClient {
     if (this.socket.connected) return ConnectionStatus.CONNECTED
     if (this.isConnecting) return ConnectionStatus.CONNECTING
     return ConnectionStatus.DISCONNECTED
+  }
+
+  /**
+   * 获取认证状态
+   */
+  public getAuthStatus(): SocketAuthStatus {
+    return this.authStatus
+  }
+
+  /**
+   * 设置认证错误处理器
+   */
+  public setAuthErrorHandler(handler: (error: SocketError) => void): void {
+    this.authErrorHandler = handler
+  }
+
+  /**
+   * 处理认证错误
+   */
+  private handleAuthError(error: SocketError): void {
+    if (this.authErrorHandler) {
+      this.authErrorHandler(error)
+    } else {
+      logger.error('未设置认证错误处理器:', error)
+    }
   }
 
   /**

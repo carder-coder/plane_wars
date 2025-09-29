@@ -1,4 +1,5 @@
 import { RoomDetails, CreateRoomRequest, JoinRoomRequest, RoomListItem, ApiResponse, PaginatedResponse } from '../types/index.js';
+export declare function setSocketManager(sm: any): void;
 export declare class MongoRoomService {
     static createRoom(hostUserId: string, data: CreateRoomRequest): Promise<ApiResponse<any>>;
     static joinRoom(userId: string, data: JoinRoomRequest): Promise<ApiResponse<RoomDetails>>;
@@ -8,6 +9,10 @@ export declare class MongoRoomService {
     static getRoomDetails(roomId: string): Promise<RoomDetails | null>;
     static getUserRooms(userId: string): Promise<ApiResponse<any[]>>;
     static deleteRoom(roomId: string, userId: string): Promise<ApiResponse>;
+    static checkReconnect(userId: string): Promise<ApiResponse<{
+        hasActiveRoom: boolean;
+        roomDetails?: any;
+    }>>;
     static kickPlayer(roomId: string, hostUserId: string, targetUserId: string): Promise<ApiResponse>;
 }
 //# sourceMappingURL=mongoRoomService.d.ts.map

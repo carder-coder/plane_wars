@@ -129,5 +129,86 @@ export class RoomController {
             });
         }
     }
+    static async checkReconnect(req, res) {
+        try {
+            const userId = req.user?.userId;
+            if (!userId) {
+                res.status(401).json({
+                    success: false,
+                    message: '未认证的用户',
+                    error: { code: 'UNAUTHORIZED' }
+                });
+                return;
+            }
+            const result = await RoomService.checkReconnect(userId);
+            const statusCode = result.success ? 200 : 400;
+            res.status(statusCode).json(result);
+        }
+        catch (error) {
+            logger.error('检查重连状态控制器错误:', error);
+            res.status(500).json({
+                success: false,
+                message: '服务器内部错误',
+                error: { code: 'INTERNAL_ERROR' }
+            });
+        }
+    }
+    static async dissolveRoom(req, res) {
+        try {
+            const userId = req.user?.userId;
+            const { roomId } = req.params;
+            if (!userId) {
+                res.status(401).json({
+                    success: false,
+                    message: '未认证的用户',
+                    error: { code: 'UNAUTHORIZED' }
+                });
+                return;
+            }
+            const result = await RoomService.deleteRoom(roomId, userId);
+            const statusCode = result.success ? 200 : 400;
+            res.status(statusCode).json(result);
+            if (result.success) {
+                logger.info(`用户 ${userId} 解散房间: ${roomId}`);
+            }
+        }
+        catch (error) {
+            logger.error('解散房间控制器错误:', error);
+            res.status(500).json({
+                success: false,
+                message: '服务器内部错误',
+                error: { code: 'INTERNAL_ERROR' }
+            });
+        }
+    }
+    static async kickPlayer(req, res) {
+        try {
+            const userId = req.user?.userId;
+            const { roomId } = req.params;
+            const { targetUserId } = req.body;
+            if (!userId) {
+                res.status(401).json({
+                    success: false,
+                    message: '未认证的用户',
+                    error: { code: 'UNAUTHORIZED' }
+                });
+                return;
+            }
+            const result = await RoomService.kickPlayer(roomId, userId, targetUserId);
+            const statusCode = result.success ? 200 : 400;
+            res.status(statusCode).json(result);
+            if (result.success) {
+                logger.info(`用户 ${userId} 踢出玩家 ${targetUserId} 从房间: ${roomId}`);
+            }
+        }
+        catch (error) {
+            logger.error('踢出玩家控制器错误:', error);
+            res.status(500).json({
+                success: false,
+                message: '服务器内部错误',
+                error: { code: 'INTERNAL_ERROR' }
+            });
+        }
+    }
 }
 //# sourceMappingURL=roomController.js.map

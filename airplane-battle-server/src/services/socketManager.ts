@@ -154,13 +154,44 @@ export class SocketManager {
         return
       }
 
-      const { roomId, password } = data
+      logger.info(`用户 ${connection.username} 尝试加入房间:`, {
+        dataType: typeof data,
+        data: data
+      })
+      
+      // 处理消息格式，可能是SocketMessage或直接payload
+      let payload = data
+      if (data && typeof data === 'object' && 'type' in data && 'payload' in data) {
+        // 是SocketMessage的格式
+        payload = data.payload
+        logger.info(`检测到SocketMessage格式，提取payload:`, payload)
+      }
+      
+      const { roomId, password } = payload || {}
+      
+      // 验证roomId
+      if (!roomId || typeof roomId !== 'string') {
+        logger.warn(`无效的房间ID:`, {
+          roomId,
+          type: typeof roomId,
+          payload: payload
+        })
+        this.sendError(socket, 'JOIN_ROOM_FAILED', '房间ID无效')
+        return
+      }
 
       // 使用房间服务加入房间
+      logger.info(`调用房间服务加入房间: roomId=${roomId}, userId=${connection.userId}`)
       const joinResult = await RoomService.joinRoom(connection.userId, { roomId, password })
       
+      logger.info(`房间服务返回结果:`, {
+        success: joinResult.success,
+        message: joinResult.message,
+        error: joinResult.error
+      })
+      
       if (!joinResult.success) {
-        this.sendError(socket, 'JOIN_ROOM_FAILED', joinResult.message)
+        this.sendError(socket, 'JOIN_ROOM_FAILED', joinResult.message || '加入房间失败')
         return
       }
 
@@ -174,7 +205,7 @@ export class SocketManager {
         username: connection.username
       }, socket.id)
 
-      logger.info(`用户 ${connection.username} 加入房间 ${roomId}`)
+      logger.info(`用户 ${connection.username} 成功加入房间 ${roomId}`)
 
       // 发送房间信息给新加入的用户
       this.sendMessage(socket, MessageType.ROOM_JOINED, {
@@ -441,6 +472,72 @@ export class SocketManager {
    */
   public getOnlineUserCount(): number {
     return this.userSockets.size
+  }
+
+  /**
+   * 通知房间解散
+   */
+  public notifyRoomDissolved(roomId: string, reason?: string): void {
+    this.broadcastToRoom(roomId, MessageType.ROOM_DISSOLVED, {
+      roomId,
+      reason: reason || '房主解散了房间',
+      timestamp: Date.now()
+    })
+    
+    logger.info(`房间 ${roomId} 已解散通知已发送`)
+  }
+
+  /**
+   * 通知玩家被踢出
+   */
+  public notifyPlayerKicked(roomId: string, kickedUserId: string, reason?: string): void {
+    // 先给被踢出的用户发送通知
+    this.sendToUser(kickedUserId, MessageType.PLAYER_KICKED, {
+      roomId,
+      userId: kickedUserId,
+      reason: reason || '您被房主踢出了房间',
+      timestamp: Date.now()
+    })
+    
+    // 再给房间内其他用户发送通知
+    this.broadcastToRoom(roomId, MessageType.PLAYER_KICKED, {
+      roomId,
+      userId: kickedUserId,
+      reason: reason || '用户被房主踢出',
+      timestamp: Date.now()
+    })
+    
+    // 从 Socket 房间中移除被踢出的用户
+    const userSocketSet = this.userSockets.get(kickedUserId)
+    if (userSocketSet) {
+      userSocketSet.forEach(socketId => {
+        const socket = this.io.sockets.sockets.get(socketId)
+        if (socket) {
+          socket.leave(roomId)
+          const connection = this.connections.get(socketId)
+          if (connection) {
+            connection.roomId = undefined
+          }
+        }
+      })
+    }
+    
+    logger.info(`用户 ${kickedUserId} 被踢出房间 ${roomId} 通知已发送`)
+  }
+
+  /**
+   * 通知房主转移
+   */
+  public notifyHostTransferred(roomId: string, oldHostId: string, newHostId: string, newHostUsername: string): void {
+    this.broadcastToRoom(roomId, MessageType.HOST_TRANSFERRED, {
+      roomId,
+      oldHostId,
+      newHostId,
+      newHostUsername,
+      timestamp: Date.now()
+    })
+    
+    logger.info(`房间 ${roomId} 房主从 ${oldHostId} 转移给 ${newHostId}`)
   }
 
   /**

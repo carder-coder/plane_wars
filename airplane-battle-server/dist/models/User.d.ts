@@ -14,12 +14,16 @@ export interface IUser extends Document {
     isActive: boolean;
     createdAt: Date;
     lastLogin?: Date;
+    currentRoomId?: string;
     updateStats(isWin: boolean, experienceGain?: number): void;
+    updateCurrentRoom(roomId?: string): void;
+    clearCurrentRoom(): void;
 }
 interface IUserModel extends Model<IUser> {
     findByUsername(username: string): Promise<IUser | null>;
     findByEmail(email: string): Promise<IUser | null>;
     getLeaderboard(limit: number): Promise<IUser[]>;
+    findUsersInRoom(roomId: string): Promise<IUser[]>;
 }
 export declare const User: IUserModel;
 export {};
