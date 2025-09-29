@@ -4,7 +4,7 @@ import { config } from '../config/index.js'
 import { logger } from '../utils/logger.js'
 import { redis } from '../database/redis.js'
 import { JWTPayload, MessageType, BaseMessage, ErrorMessage } from '../types/index.js'
-import { RoomService } from './roomService.js'
+import { RoomService } from './serviceFactory.js'
 
 /**
  * Socket连接信息接口

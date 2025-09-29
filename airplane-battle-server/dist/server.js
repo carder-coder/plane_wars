@@ -6,9 +6,8 @@ import { createServer } from 'http';
 import { Server as SocketServer } from 'socket.io';
 import { config } from './config/index.js';
 import { logger } from './utils/logger.js';
-import { database } from './database/connection.js';
 import { redis } from './database/redis.js';
-import { Migration } from './database/migrate.js';
+import { ServiceFactory } from './services/serviceFactory.js';
 import { errorHandler, notFoundHandler, requestLogger, generalRateLimit, corsOptions } from './middlewares/index.js';
 import { SocketManager } from './services/socketManager.js';
 import { authRouter } from './routes/auth.js';
@@ -104,15 +103,12 @@ export class Server {
     }
     async initializeDatabase() {
         try {
-            const isConnected = await database.testConnection();
-            if (!isConnected) {
-                throw new Error('数据库连接失败');
-            }
-            await Migration.runMigrations();
-            logger.info('数据库初始化完成');
+            ServiceFactory.initFromConfig();
+            await ServiceFactory.initializeDatabase();
+            logger.info('MongoDB初始化完成');
         }
         catch (error) {
-            logger.error('数据库初始化失败:', error);
+            logger.error('MongoDB初始化失败:', error);
             throw error;
         }
     }
@@ -130,8 +126,8 @@ export class Server {
         try {
             await this.initializeDatabase();
             await this.initializeRedis();
-            this.httpServer.listen(config.port, () => {
-                logger.info(`服务器已启动 - http://localhost:${config.port}`);
+            this.httpServer.listen(config.port, '0.0.0.0', () => {
+                logger.info(`服务器已启动 - http://0.0.0.0:${config.port}`);
                 logger.info(`环境: ${config.nodeEnv}`);
                 logger.info(`允许的域名: ${config.allowedOrigins.join(', ')}`);
             });
@@ -150,7 +146,7 @@ export class Server {
             this.io.close(() => {
                 logger.info('Socket.IO服务已关闭');
             });
-            await database.close();
+            await ServiceFactory.closeDatabase();
             await redis.disconnect();
             logger.info('服务器已优雅关闭');
             process.exit(0);

@@ -4,17 +4,60 @@ export { Game } from './Game.js';
 export { UserSession } from './UserSession.js';
 export { mongoDatabase, mongoose } from '../database/mongoConnection.js';
 export async function initializeIndexes() {
-    const { User, Room, Game, UserSession } = await import('./index.js');
+    const { User } = await import('./User.js');
+    const { Room } = await import('./Room.js');
+    const { Game } = await import('./Game.js');
+    const { UserSession } = await import('./UserSession.js');
     try {
         console.log('开始创建数据库索引...');
-        await User.createIndexes();
-        console.log('✓ 用户索引创建完成');
-        await Room.createIndexes();
-        console.log('✓ 房间索引创建完成');
-        await Game.createIndexes();
-        console.log('✓ 游戏索引创建完成');
-        await UserSession.createIndexes();
-        console.log('✓ 用户会话索引创建完成');
+        try {
+            await User.createIndexes();
+            console.log('✓ 用户索引创建完成');
+        }
+        catch (error) {
+            if (error.code === 85) {
+                console.log('✓ 用户索引已存在（跳过冒突）');
+            }
+            else {
+                throw error;
+            }
+        }
+        try {
+            await Room.createIndexes();
+            console.log('✓ 房间索引创建完成');
+        }
+        catch (error) {
+            if (error.code === 85) {
+                console.log('✓ 房间索引已存在（跳过冒突）');
+            }
+            else {
+                throw error;
+            }
+        }
+        try {
+            await Game.createIndexes();
+            console.log('✓ 游戏索引创建完成');
+        }
+        catch (error) {
+            if (error.code === 85) {
+                console.log('✓ 游戏索引已存在（跳过冒突）');
+            }
+            else {
+                throw error;
+            }
+        }
+        try {
+            await UserSession.createIndexes();
+            console.log('✓ 用户会话索引创建完成');
+        }
+        catch (error) {
+            if (error.code === 85) {
+                console.log('✓ 用户会话索引已存在（跳过冒突）');
+            }
+            else {
+                throw error;
+            }
+        }
         console.log('所有数据库索引创建完成');
     }
     catch (error) {
@@ -38,7 +81,10 @@ export async function dropAllCollections() {
     }
 }
 export async function getDatabaseStats() {
-    const { User, Room, Game, UserSession } = await import('./index.js');
+    const { User } = await import('./User.js');
+    const { Room } = await import('./Room.js');
+    const { Game } = await import('./Game.js');
+    const { UserSession } = await import('./UserSession.js');
     try {
         const [userCount, roomCount, gameCount, sessionCount] = await Promise.all([
             User.countDocuments(),

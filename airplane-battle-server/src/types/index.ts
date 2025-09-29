@@ -39,18 +39,6 @@ export interface PaginatedResponse<T> {
 }
 
 /**
- * 数据库连接配置接口
- */
-export interface DatabaseConfig {
-  host: string
-  port: number
-  database: string
-  username: string
-  password: string
-  ssl?: boolean
-}
-
-/**
  * MongoDB连接配置接口
  */
 export interface MongoDBConfig {
@@ -89,7 +77,6 @@ export interface JWTConfig {
 export interface ServerConfig {
   port: number
   nodeEnv: string
-  database: DatabaseConfig
   mongodb: MongoDBConfig
   redis: RedisConfig
   jwt: JWTConfig

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { RoomService } from '../services/roomService.js'
+import { RoomService } from '../services/serviceFactory.js'
 import { logger } from '../utils/logger.js'
 import { CreateRoomRequest, JoinRoomRequest } from '../types/index.js'
 

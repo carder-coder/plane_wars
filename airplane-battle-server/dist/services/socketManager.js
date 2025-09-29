@@ -3,7 +3,7 @@ import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 import { redis } from '../database/redis.js';
 import { MessageType } from '../types/index.js';
-import { RoomService } from './roomService.js';
+import { RoomService } from './serviceFactory.js';
 export class SocketManager {
     io;
     connections = new Map();

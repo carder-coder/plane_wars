@@ -2,8 +2,7 @@ import { Schema, model } from 'mongoose';
 const roomMemberSchema = new Schema({
     userId: {
         type: String,
-        required: true,
-        index: true
+        required: true
     },
     playerNumber: {
         type: Number,

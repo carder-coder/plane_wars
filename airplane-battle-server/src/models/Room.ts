@@ -52,8 +52,8 @@ export interface IRoomModel extends Model<IRoom> {
 const roomMemberSchema = new Schema<IRoomMember>({
   userId: {
     type: String,
-    required: true,
-    index: true
+    required: true
+    // 移除 index: true，使用roomSchema中的复合索引
   },
   playerNumber: {
     type: Number,

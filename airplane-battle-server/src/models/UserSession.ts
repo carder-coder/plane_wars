@@ -90,8 +90,8 @@ const userSessionSchema = new Schema<IUserSession>({
   },
   expiresAt: {
     type: Date,
-    required: true,
-    index: true
+    required: true
+    // 移除 index: true，使用单独的TTL索引定义
   }
 }, {
   timestamps: false,

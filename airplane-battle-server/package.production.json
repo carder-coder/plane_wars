@@ -1,0 +1,46 @@
+{
+  "name": "airplane-battle-server",
+  "version": "1.0.0",
+  "description": "飞机大战游戏服务端",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "start": "node dist/server.js",
+    "mongo:migrate": "node dist/database/migrationTool.js migrate",
+    "mongo:validate": "node dist/database/migrationTool.js validate",
+    "mongo:reset": "node dist/database/migrationTool.js reset --confirm",
+    "mongo:stats": "node dist/database/migrationTool.js stats",
+    "mongo:indexes": "node dist/database/migrationTool.js init-indexes",
+    "mongo:test": "node dist/database/migrationTool.js test-connection",
+    "mongo:full": "node dist/database/migrationTool.js full-init",
+    "mongo:fix-indexes": "node dist/database/indexFixer.js"
+  },
+  "keywords": [
+    "airplane-battle",
+    "game",
+    "multiplayer"
+  ],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "dependencies": {
+    "@types/mongoose": "^5.11.97",
+    "bcrypt": "^5.1.1",
+    "commander": "^12.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.1",
+    "helmet": "^7.2.0",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.18.2",
+    "morgan": "^1.10.1",
+    "redis": "^4.7.1",
+    "socket.io": "^4.8.1",
+    "uuid": "^9.0.1"
+  }
+}

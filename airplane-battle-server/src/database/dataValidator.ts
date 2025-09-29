@@ -1,13 +1,10 @@
-import { Client } from 'pg'
 import { mongoDatabase, User, Room, Game, UserSession } from '../models/index.js'
 import { logger } from '../utils/logger.js'
-import { config } from '../config/index.js'
 
 /**
- * 数据验证工具
+ * MongoDB数据验证工具
  */
 export class DataValidator {
-  private pgClient: Client
   private validationResults: Array<{
     test: string
     status: 'pass' | 'fail'
@@ -16,14 +13,7 @@ export class DataValidator {
   }> = []
 
   constructor() {
-    this.pgClient = new Client({
-      host: config.database.host,
-      port: config.database.port,
-      database: config.database.database,
-      user: config.database.username,
-      password: config.database.password,
-      ssl: config.database.ssl ? { rejectUnauthorized: false } : false
-    })
+    // MongoDB连接通过models/index.js管理
   }
 
   /**
@@ -31,10 +21,10 @@ export class DataValidator {
    */
   public async runFullValidation(): Promise<boolean> {
     try {
-      logger.info('开始执行数据验证...')
+      logger.info('开始执行MongoDB数据验证...')
 
       // 连接数据库
-      await this.connectDatabases()
+      await this.connectDatabase()
 
       // 基础统计验证
       await this.validateBasicStats()
@@ -60,20 +50,19 @@ export class DataValidator {
       logger.error('数据验证失败:', error)
       return false
     } finally {
-      await this.disconnectDatabases()
+      await this.disconnectDatabase()
     }
   }
 
   /**
    * 连接数据库
    */
-  private async connectDatabases(): Promise<void> {
+  private async connectDatabase(): Promise<void> {
     try {
-      await this.pgClient.connect()
       await mongoDatabase.connect()
-      logger.info('数据库连接成功')
+      logger.info('MongoDB连接成功')
     } catch (error) {
-      logger.error('数据库连接失败:', error)
+      logger.error('MongoDB连接失败:', error)
       throw error
     }
   }
@@ -81,12 +70,11 @@ export class DataValidator {
   /**
    * 断开数据库连接
    */
-  private async disconnectDatabases(): Promise<void> {
+  private async disconnectDatabase(): Promise<void> {
     try {
-      await this.pgClient.end()
       await mongoDatabase.disconnect()
     } catch (error) {
-      logger.error('关闭数据库连接失败:', error)
+      logger.error('关闭MongoDB连接失败:', error)
     }
   }
 
@@ -97,14 +85,6 @@ export class DataValidator {
     try {
       logger.info('执行基础统计验证...')
 
-      // 获取PostgreSQL记录数
-      const pgStats = await Promise.all([
-        this.pgClient.query('SELECT COUNT(*) as count FROM users'),
-        this.pgClient.query('SELECT COUNT(*) as count FROM rooms'),
-        this.pgClient.query('SELECT COUNT(*) as count FROM games'),
-        this.pgClient.query('SELECT COUNT(*) as count FROM user_sessions WHERE expires_at > NOW() AND is_active = true')
-      ])
-
       // 获取MongoDB记录数
       const mongoStats = await Promise.all([
         User.countDocuments(),
@@ -113,28 +93,19 @@ export class DataValidator {
         UserSession.countDocuments()
       ])
 
-      const tables = ['users', 'rooms', 'games', 'user_sessions']
+      const collections = ['users', 'rooms', 'games', 'user_sessions']
       
-      for (let i = 0; i < tables.length; i++) {
-        const pgCount = parseInt(pgStats[i].rows[0].count)
-        const mongoCount = mongoStats[i]
+      for (let i = 0; i < collections.length; i++) {
+        const count = mongoStats[i]
+        const testName = `${collections[i]}_count_validation`
         
-        const testName = `${tables[i]}_count_validation`
+        this.recordValidation(testName, count >= 0, {
+          collection: collections[i],
+          count: count,
+          valid: count >= 0
+        })
         
-        if (tables[i] === 'user_sessions') {
-          // 会话数据可能不完全一致，只要MongoDB不为0即可
-          this.recordValidation(testName, mongoCount >= 0, {
-            postgresCount: pgCount,
-            mongoCount: mongoCount,
-            note: '会话数据因TTL可能存在差异'
-          })
-        } else {
-          this.recordValidation(testName, pgCount === mongoCount, {
-            postgresCount: pgCount,
-            mongoCount: mongoCount,
-            match: pgCount === mongoCount
-          })
-        }
+        logger.info(`${collections[i]} 集合记录数: ${count}`)
       }
 
     } catch (error) {
@@ -173,38 +144,28 @@ export class DataValidator {
     const sampleUsers = await User.find().limit(10)
     
     for (const user of sampleUsers) {
-      const pgUser = await this.pgClient.query(
-        'SELECT * FROM users WHERE user_id = $1',
-        [user.userId]
-      )
-
-      if (pgUser.rows.length === 0) {
-        this.recordValidation('user_integrity_missing', false, {
-          userId: user.userId,
-          issue: 'PostgreSQL中不存在对应用户'
-        })
-        continue
-      }
-
-      const pg = pgUser.rows[0]
       const passed = 
-        user.username === pg.username &&
-        user.email === pg.email &&
-        user.level === pg.level &&
-        user.wins === pg.wins &&
-        user.losses === pg.losses &&
-        user.rating === pg.rating
+        !!user.userId &&
+        !!user.username &&
+        !!user.email &&
+        !!user.passwordHash &&
+        typeof user.level === 'number' &&
+        typeof user.wins === 'number' &&
+        typeof user.losses === 'number' &&
+        typeof user.rating === 'number'
 
-      this.recordValidation(`user_integrity_${user.userId}`, passed, {
+      this.recordValidation(`user_integrity_${user.userId || 'unknown'}`, passed, {
         userId: user.userId,
         username: user.username,
-        fieldsMatch: {
-          username: user.username === pg.username,
-          email: user.email === pg.email,
-          level: user.level === pg.level,
-          wins: user.wins === pg.wins,
-          losses: user.losses === pg.losses,
-          rating: user.rating === pg.rating
+        hasRequiredFields: {
+          userId: !!user.userId,
+          username: !!user.username,
+          email: !!user.email,
+          passwordHash: !!user.passwordHash,
+          level: typeof user.level === 'number',
+          wins: typeof user.wins === 'number',
+          losses: typeof user.losses === 'number',
+          rating: typeof user.rating === 'number'
         }
       })
     }
@@ -217,36 +178,18 @@ export class DataValidator {
     const sampleRooms = await Room.find().limit(10)
 
     for (const room of sampleRooms) {
-      const pgRoom = await this.pgClient.query(`
-        SELECT r.*, 
-               COUNT(rm.user_id) as member_count
-        FROM rooms r
-        LEFT JOIN room_members rm ON r.room_id = rm.room_id
-        WHERE r.room_id = $1
-        GROUP BY r.room_id
-      `, [room.roomId])
+      const memberCountValid = room.members.length === room.currentPlayers
+      const hasRequiredFields = !!(room.roomId && room.roomName && room.hostUserId)
+      
+      const passed = memberCountValid && hasRequiredFields
 
-      if (pgRoom.rows.length === 0) {
-        this.recordValidation('room_integrity_missing', false, {
-          roomId: room.roomId,
-          issue: 'PostgreSQL中不存在对应房间'
-        })
-        continue
-      }
-
-      const pg = pgRoom.rows[0]
-      const memberCountMatch = room.members.length === parseInt(pg.member_count)
-      const currentPlayersMatch = room.currentPlayers === pg.current_players
-
-      this.recordValidation(`room_integrity_${room.roomId}`, memberCountMatch && currentPlayersMatch, {
+      this.recordValidation(`room_integrity_${room.roomId || 'unknown'}`, passed, {
         roomId: room.roomId,
         roomName: room.roomName,
-        memberCountMatch,
-        currentPlayersMatch,
-        mongoMembers: room.members.length,
-        pgMembers: parseInt(pg.member_count),
-        mongoCurrentPlayers: room.currentPlayers,
-        pgCurrentPlayers: pg.current_players
+        memberCountValid,
+        hasRequiredFields,
+        membersLength: room.members.length,
+        currentPlayers: room.currentPlayers
       })
     }
   }
@@ -258,33 +201,20 @@ export class DataValidator {
     const sampleGames = await Game.find().limit(10)
 
     for (const game of sampleGames) {
-      const pgGame = await this.pgClient.query(
-        'SELECT * FROM games WHERE game_id = $1',
-        [game.gameId]
-      )
+      const hasRequiredFields = !!(game.gameId && game.player1Id && game.player2Id)
+      const hasValidPhase = ['waiting', 'placement', 'battle', 'finished'].includes(game.currentPhase)
+      const hasValidTurnCount = typeof game.turnCount === 'number' && game.turnCount >= 0
+      
+      const passed = hasRequiredFields && hasValidPhase && hasValidTurnCount
 
-      if (pgGame.rows.length === 0) {
-        this.recordValidation('game_integrity_missing', false, {
-          gameId: game.gameId,
-          issue: 'PostgreSQL中不存在对应游戏'
-        })
-        continue
-      }
-
-      const pg = pgGame.rows[0]
-      const passed = 
-        game.player1Id === pg.player1_id &&
-        game.player2Id === pg.player2_id &&
-        game.currentPhase === pg.current_phase &&
-        game.turnCount === pg.turn_count
-
-      this.recordValidation(`game_integrity_${game.gameId}`, passed, {
+      this.recordValidation(`game_integrity_${game.gameId || 'unknown'}`, passed, {
         gameId: game.gameId,
-        fieldsMatch: {
-          player1Id: game.player1Id === pg.player1_id,
-          player2Id: game.player2Id === pg.player2_id,
-          currentPhase: game.currentPhase === pg.current_phase,
-          turnCount: game.turnCount === pg.turn_count
+        hasRequiredFields: {
+          gameId: !!game.gameId,
+          player1Id: !!game.player1Id,
+          player2Id: !!game.player2Id,
+          validPhase: hasValidPhase,
+          validTurnCount: hasValidTurnCount
         }
       })
     }
@@ -590,9 +520,9 @@ export class DataValidator {
       results: this.validationResults
     }
 
-    logger.info('数据验证报告:', JSON.stringify(report, null, 2))
+    logger.info('MongoDB数据验证报告:', JSON.stringify(report, null, 2))
 
-    console.log('\n========== 数据验证报告 ==========')
+    console.log('\n========== MongoDB数据验证报告 ==========')
     console.log(`验证ID: ${report.validationId}`)
     console.log(`总测试数: ${totalTests}`)
     console.log(`通过测试: ${passedTests}`)

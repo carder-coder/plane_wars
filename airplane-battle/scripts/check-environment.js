@@ -64,7 +64,8 @@ function checkEnvironment() {
     console.log(`关键依赖:`);
     console.log(`  React: ${packageJson.dependencies?.react || '未安装'}`);
     console.log(`  Vite: ${packageJson.dependencies?.vite || '未安装'}`);
-    console.log(`  TypeScript: ${packageJson.dependencies?.typescript || '未安装'}\n`);
+    console.log(`  TypeScript: ${packageJson.dependencies?.typescript || '未安装'}`);
+    console.log(`  Terser: ${packageJson.devDependencies?.terser || '未安装 (构建时需要)'}\n`);
     
     console.log(`✅ 环境检查完成！`);
     console.log(`📚 如果遇到问题，请参考项目README或联系开发团队。\n`);

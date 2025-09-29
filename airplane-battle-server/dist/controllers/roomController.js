@@ -1,4 +1,4 @@
-import { RoomService } from '../services/roomService.js';
+import { RoomService } from '../services/serviceFactory.js';
 import { logger } from '../utils/logger.js';
 export class RoomController {
     static async createRoom(req, res) {

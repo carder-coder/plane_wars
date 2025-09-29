@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import { DataMigration } from './dataMigration.js';
 import { DataValidator } from './dataValidator.js';
 import { mongoDatabase, dropAllCollections, getDatabaseStats, initializeIndexes } from '../models/index.js';
 import { logger } from '../utils/logger.js';
@@ -11,15 +10,10 @@ program
     .version('1.0.0');
 program
     .command('migrate')
-    .description('执行完整的数据迁移')
-    .option('--dry-run', '模拟运行，不实际迁移数据')
-    .option('--force', '强制迁移，即使目标数据库不为空')
+    .description('初始化MongoDB数据库')
+    .option('--force', '强制初始化，即使目标数据库不为空')
     .action(async (options) => {
     try {
-        if (options.dryRun) {
-            logger.info('执行模拟迁移（不会实际迁移数据）');
-            return;
-        }
         if (!options.force) {
             await mongoDatabase.connect();
             const stats = await getDatabaseStats();
@@ -27,17 +21,18 @@ program
                 return typeof count === 'number' ? sum + count : sum;
             }, 0);
             if (totalRecords > 0) {
-                logger.warn('目标数据库不为空，使用 --force 参数强制迁移');
+                logger.warn('目标数据库不为空，使用 --force 参数强制初始化');
                 process.exit(1);
             }
             await mongoDatabase.disconnect();
         }
-        const migration = new DataMigration();
-        await migration.runFullMigration();
-        logger.info('迁移完成！');
+        await mongoDatabase.connect();
+        await initializeIndexes();
+        await mongoDatabase.disconnect();
+        logger.info('MongoDB初始化完成！');
     }
     catch (error) {
-        logger.error('迁移失败:', error);
+        logger.error('MongoDB初始化失败:', error);
         process.exit(1);
     }
 });
@@ -181,30 +176,32 @@ program
     }
 });
 program
-    .command('full-migration')
-    .description('执行完整迁移并验证')
-    .option('--force', '强制迁移')
+    .command('full-init')
+    .description('执行MongoDB初始化并验证')
+    .option('--force', '强制初始化')
     .action(async (options) => {
     try {
-        logger.info('开始执行完整迁移流程...');
-        const migration = new DataMigration();
+        logger.info('开始执行MongoDB初始化流程...');
+        await mongoDatabase.connect();
         if (options.force) {
             logger.info('强制模式：将覆盖现有数据');
+            await dropAllCollections();
         }
-        await migration.runFullMigration();
+        await initializeIndexes();
+        await mongoDatabase.disconnect();
         const validator = new DataValidator();
         const success = await validator.runFullValidation();
         if (success) {
-            logger.info('完整迁移流程成功完成！');
+            logger.info('MongoDB初始化流程成功完成！');
             process.exit(0);
         }
         else {
-            logger.error('迁移完成但验证失败！');
+            logger.error('初始化完成但验证失败！');
             process.exit(1);
         }
     }
     catch (error) {
-        logger.error('完整迁移流程失败:', error);
+        logger.error('MongoDB初始化流程失败:', error);
         process.exit(1);
     }
 });

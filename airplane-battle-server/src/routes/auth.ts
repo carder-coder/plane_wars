@@ -22,6 +22,32 @@ authRouter.post(
 )
 
 /**
+ * @route GET /api/auth/register
+ * @desc 获取注册表单信息（用于API测试）
+ * @access Public
+ */
+authRouter.get(
+  '/register',
+  (_req, res) => {
+    res.json({
+      success: true,
+      message: '注册接口可用，请使用POST方法',
+      data: {
+        method: 'POST',
+        endpoint: '/api/auth/register',
+        requiredFields: ['username', 'email', 'password', 'displayName'],
+        example: {
+          username: 'testuser',
+          email: 'test@example.com',
+          password: 'password123',
+          displayName: '测试用户'
+        }
+      }
+    })
+  }
+)
+
+/**
  * @route POST /api/auth/login
  * @desc 用户登录
  * @access Public

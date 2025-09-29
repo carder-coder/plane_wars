@@ -24,14 +24,6 @@ export interface PaginatedResponse<T> {
     limit: number;
     totalPages: number;
 }
-export interface DatabaseConfig {
-    host: string;
-    port: number;
-    database: string;
-    username: string;
-    password: string;
-    ssl?: boolean;
-}
 export interface MongoDBConfig {
     host: string;
     port: number;
@@ -56,7 +48,6 @@ export interface JWTConfig {
 export interface ServerConfig {
     port: number;
     nodeEnv: string;
-    database: DatabaseConfig;
     mongodb: MongoDBConfig;
     redis: RedisConfig;
     jwt: JWTConfig;

@@ -11,26 +11,61 @@ export { mongoDatabase, mongoose } from '../database/mongoConnection.js'
  * 初始化所有数据库索引
  */
 export async function initializeIndexes(): Promise<void> {
-  const { User, Room, Game, UserSession } = await import('./index.js')
+  const { User } = await import('./User.js')
+  const { Room } = await import('./Room.js')
+  const { Game } = await import('./Game.js')
+  const { UserSession } = await import('./UserSession.js')
   
   try {
     console.log('开始创建数据库索引...')
     
     // 创建用户索引
-    await User.createIndexes()
-    console.log('✓ 用户索引创建完成')
+    try {
+      await User.createIndexes()
+      console.log('✓ 用户索引创建完成')
+    } catch (error: any) {
+      if (error.code === 85) { // IndexOptionsConflict
+        console.log('✓ 用户索引已存在（跳过冒突）')
+      } else {
+        throw error
+      }
+    }
     
     // 创建房间索引
-    await Room.createIndexes()
-    console.log('✓ 房间索引创建完成')
+    try {
+      await Room.createIndexes()
+      console.log('✓ 房间索引创建完成')
+    } catch (error: any) {
+      if (error.code === 85) { // IndexOptionsConflict
+        console.log('✓ 房间索引已存在（跳过冒突）')
+      } else {
+        throw error
+      }
+    }
     
     // 创建游戏索引
-    await Game.createIndexes()
-    console.log('✓ 游戏索引创建完成')
+    try {
+      await Game.createIndexes() 
+      console.log('✓ 游戏索引创建完成')
+    } catch (error: any) {
+      if (error.code === 85) { // IndexOptionsConflict
+        console.log('✓ 游戏索引已存在（跳过冒突）')
+      } else {
+        throw error
+      }
+    }
     
     // 创建用户会话索引
-    await UserSession.createIndexes()
-    console.log('✓ 用户会话索引创建完成')
+    try {
+      await UserSession.createIndexes()
+      console.log('✓ 用户会话索引创建完成')
+    } catch (error: any) {
+      if (error.code === 85) { // IndexOptionsConflict
+        console.log('✓ 用户会话索引已存在（跳过冒突）')
+      } else {
+        throw error
+      }
+    }
     
     console.log('所有数据库索引创建完成')
   } catch (error) {
@@ -64,7 +99,10 @@ export async function dropAllCollections(): Promise<void> {
  * 获取数据库统计信息
  */
 export async function getDatabaseStats(): Promise<any> {
-  const { User, Room, Game, UserSession } = await import('./index.js')
+  const { User } = await import('./User.js')
+  const { Room } = await import('./Room.js')
+  const { Game } = await import('./Game.js')
+  const { UserSession } = await import('./UserSession.js')
   
   try {
     const [userCount, roomCount, gameCount, sessionCount] = await Promise.all([

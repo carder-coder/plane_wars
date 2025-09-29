@@ -1,10 +1,9 @@
 export declare class DataValidator {
-    private pgClient;
     private validationResults;
     constructor();
     runFullValidation(): Promise<boolean>;
-    private connectDatabases;
-    private disconnectDatabases;
+    private connectDatabase;
+    private disconnectDatabase;
     private validateBasicStats;
     private validateDataIntegrity;
     private validateUserIntegrity;

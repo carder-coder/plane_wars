@@ -6,9 +6,8 @@ import { createServer } from 'http'
 import { Server as SocketServer } from 'socket.io'
 import { config } from './config/index.js'
 import { logger } from './utils/logger.js'
-import { database } from './database/connection.js'
 import { redis } from './database/redis.js'
-import { Migration } from './database/migrate.js'
+import { ServiceFactory } from './services/serviceFactory.js'
 import { 
   errorHandler, 
   notFoundHandler, 
@@ -169,22 +168,19 @@ export class Server {
   }
 
   /**
-   * 初始化数据库连接
+   * 初始化MongoDB数据库连接
    */
   private async initializeDatabase(): Promise<void> {
     try {
-      // 测试数据库连接
-      const isConnected = await database.testConnection()
-      if (!isConnected) {
-        throw new Error('数据库连接失败')
-      }
-
-      // 运行数据库迁移
-      await Migration.runMigrations()
+      // 初始化ServiceFactory
+      ServiceFactory.initFromConfig()
       
-      logger.info('数据库初始化完成')
+      // 初始化MongoDB连接
+      await ServiceFactory.initializeDatabase()
+      
+      logger.info('MongoDB初始化完成')
     } catch (error) {
-      logger.error('数据库初始化失败:', error)
+      logger.error('MongoDB初始化失败:', error)
       throw error
     }
   }
@@ -207,15 +203,15 @@ export class Server {
    */
   public async start(): Promise<void> {
     try {
-      // 初始化数据库
+      // 初始化MongoDB数据库
       await this.initializeDatabase()
 
       // 初始化Redis
       await this.initializeRedis()
 
-      // 启动HTTP服务器
-      this.httpServer.listen(config.port, () => {
-        logger.info(`服务器已启动 - http://localhost:${config.port}`)
+      // 启动HTTP服务器 - 监听所有网络接口
+      this.httpServer.listen(config.port, '0.0.0.0', () => {
+        logger.info(`服务器已启动 - http://0.0.0.0:${config.port}`)
         logger.info(`环境: ${config.nodeEnv}`)
         logger.info(`允许的域名: ${config.allowedOrigins.join(', ')}`)
       })
@@ -242,8 +238,8 @@ export class Server {
         logger.info('Socket.IO服务已关闭')
       })
 
-      // 关闭数据库连接
-      await database.close()
+      // 关闭MongoDB连接
+      await ServiceFactory.closeDatabase()
 
       // 关闭Redis连接
       await redis.disconnect()

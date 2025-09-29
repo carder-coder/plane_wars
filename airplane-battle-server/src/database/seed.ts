@@ -1,4 +1,4 @@
-import { UserService } from '../services/userService.js'
+import { UserService } from '../services/serviceFactory.js'
 import { logger } from '../utils/logger.js'
 
 /**

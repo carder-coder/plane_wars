@@ -133,22 +133,37 @@ install_dependencies() {
     
     cd "$APP_DIR"
     
-    # 安装npm依赖
+    # 只安装生产依赖（运行时不需要TypeScript等开发工具）
     sudo -u "$APP_USER" npm ci --only=production
     
     log_info "依赖安装完成"
 }
 
-# 构建应用
+# 构建应用（可选，支持预编译模式）
 build_application() {
-    log_step "构建应用..."
+    log_step "检查应用构建..."
     
     cd "$APP_DIR"
     
-    # TypeScript编译
-    sudo -u "$APP_USER" npm run build
+    # 检查是否存在预编译的dist目录
+    if [[ -d "dist" ]]; then
+        log_info "发现预编译文件，跳过构建步骤"
+        return 0
+    fi
     
-    log_info "应用构建完成"
+    # 如果没有预编译文件，尝试本地构建
+    if [[ -f "tsconfig.json" ]]; then
+        log_warn "未发现预编译文件，尝试本地构建..."
+        # 安装开发依赖用于构建
+        sudo -u "$APP_USER" npm install
+        # TypeScript编译
+        sudo -u "$APP_USER" npm run build
+        log_info "应用构建完成"
+    else
+        log_error "未找到预编译文件且无法本地构建"
+        log_error "请在Windows环境构建后上传dist目录"
+        exit 1
+    fi
 }
 
 # 配置环境变量
@@ -338,18 +353,18 @@ deploy_application() {
     log_step "开始部署应用..."
     
     # 创建备份
-    if [[ -d "$APP_DIR" ]]; then
-        create_backup
-    fi
+    #if [[ -d "$APP_DIR" ]]; then
+    #    create_backup
+    #fi
     
     # 更新代码
-    update_code
+    #update_code
     
     # 安装依赖
-    install_dependencies
+    #install_dependencies
     
     # 构建应用
-    build_application
+    #build_application
     
     # 配置环境
     setup_environment

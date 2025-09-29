@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { UserService } from '../services/userService.js'
+import { UserService } from '../services/serviceFactory.js'
 import { logger } from '../utils/logger.js'
 import { RegisterRequest, LoginRequest } from '../types/index.js'
 
